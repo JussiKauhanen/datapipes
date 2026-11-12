@@ -361,3 +361,84 @@ pre.code .hl { background: var(--warn-bg); border-radius: 2px; }
   .search { width: 100%; }
   .menu { width: min(320px, calc(100vw - 24px)); }
 }
+
+/* ================= v2 additions ================= */
+.vtag { font: 700 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .02em; padding: 4px 6px; border-radius: 3px; background: var(--blue-bg); color: var(--blue-text); }
+.crumbs b { font-weight: 500; color: var(--text); }
+.seg { display: inline-flex; border: 1px solid var(--border-2); border-radius: 4px; overflow: hidden; }
+.seg button { height: 30px; padding: 0 10px; font: 500 13.5px/1 var(--sans); color: var(--text-2); background: var(--bg); border: 0; border-right: 1px solid var(--border-2); cursor: pointer; white-space: nowrap; }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--hover); }
+.seg button[aria-pressed="true"] { background: var(--blue-bg); color: var(--blue-text); }
+
+/* columns vary with what is visible */
+.board { min-width: 0; }
+.board.cards-v { min-width: calc(var(--ncol) * 190px); }
+.board .cols, .board .lane-row, .board .board-end { grid-template-columns: repeat(var(--ncol), minmax(0, 1fr)); }
+.board.compact-v .cols, .board.compact-v .crow, .board.compact-v .board-end { grid-template-columns: minmax(220px, 1.4fr) repeat(var(--ncol), minmax(0, 1fr)) minmax(190px, 1.1fr); }
+.board.compact-v { min-width: calc(var(--ncol) * 130px + 440px); }
+
+/* area group header */
+.area-h { display: flex; align-items: center; gap: 8px; padding: 14px 4px 6px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-2); border-bottom: 1px solid var(--border); }
+.area-h .muted { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* skipped stage: a thin line instead of an empty box */
+.slot.skip { justify-content: center; }
+.slot.skip::before { content: ""; display: block; border-top: 1px dashed var(--border-2); margin: 0 -10px; }
+.slot.stack { gap: 0; }
+.slot.stack .card + .card { margin-top: 14px; }
+.slot.stack .card + .card::before { content: "↓"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 11px; line-height: 14px; color: var(--text-3); }
+
+/* one line per flow */
+.crow { display: grid; column-gap: 8px; align-items: stretch; border-bottom: 1px solid var(--border); }
+.crow:hover > div { background: var(--hover); }
+.crow > div { padding: 7px 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; background: var(--bg); }
+.crow > .cell-stage { background: var(--sunken); position: relative; }
+.crow:hover > .cell-stage { background: var(--hover); }
+.crow .fname { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.crow .fname b { font-weight: 500; }
+.crow .fname small { color: var(--text-3); font-size: 12px; }
+.crow .fname:hover b { text-decoration: underline; }
+.crow .fstate { font-size: 13px; color: var(--text-2); }
+.fdot { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.fdot.f0 { background: #206a83; } .fdot.f1 { background: #0055cc; } .fdot.f2 { background: #5e4db2; } .fdot.f3 { background: #216e4e; } .fdot.f4 { background: #943d73; }
+.pip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 6px; border-radius: 3px; font: 600 11.5px/1 var(--sans); border: 0; cursor: pointer; white-space: nowrap; background: var(--ok-bg); color: var(--ok); }
+.pip.failed, .pip.blocked { background: var(--bad-solid); color: #fff; }
+.pip.late { background: var(--warn-solid); color: #292a2e; }
+.pip.waiting { background: transparent; color: var(--text-3); box-shadow: inset 0 0 0 1px var(--border-2); }
+.pip.sel { box-shadow: 0 0 0 2px var(--blue); }
+.pip-arr { color: var(--text-3); font-size: 11px; }
+.cell-stage.skip::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed var(--border-2); }
+.board.compact-v .cols .col-h:first-child, .board.compact-v .cols .col-h:last-child { background: var(--bg); }
+.board.compact-v .board-end > div:first-child, .board.compact-v .board-end > div:last-child { background: transparent; }
+
+/* by system */
+.sys-flows { display: flex; flex-wrap: wrap; gap: 3px; }
+.sys-flows i { width: 10px; height: 10px; border-radius: 2px; background: var(--ok); opacity: .55; }
+.sys-flows i.failed, .sys-flows i.blocked { background: var(--bad-solid); opacity: 1; }
+.sys-flows i.late { background: var(--warn-solid); opacity: 1; }
+.sys-flows i.waiting { background: var(--border-2); opacity: 1; }
+.card .meta { font-size: 12.5px; color: var(--text-3); }
+.flist { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 6px; }
+.flist li { border-top: 1px solid var(--border); }
+.flist li:first-child { border-top: 0; }
+.flist button { display: flex; width: 100%; align-items: center; gap: 8px; padding: 8px 12px; background: none; border: 0; font: inherit; color: var(--text); cursor: pointer; text-align: left; }
+.flist button:hover { background: var(--hover); }
+.flist .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flist small { color: var(--text-3); }
+
+/* data shape */
+.shape-sum { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+.shape-sum b { color: var(--text); font-weight: 600; font-size: 15px; display: block; }
+.shape table { font-size: 13px; }
+.shape td, .shape th { padding: 7px 12px; }
+.shape .miss { color: var(--bad); font-weight: 500; }
+.shape .okc { color: var(--text-3); }
+.shape .note { padding: 10px 14px; font-size: 12.5px; color: var(--text-3); border-top: 1px solid var(--border); }
+.tok { color: var(--text-3); }
+.pip.dim { opacity: .35; }
+@media (max-width: 600px) { .v1link { display: none; } }
+.col-h { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+.col-h .count.bad { padding: 0 4px; }
+.avatars { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .dots.internal i.on { background: #a9abaf; } }
