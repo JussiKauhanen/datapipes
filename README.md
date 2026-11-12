@@ -1,5 +1,18 @@
 # datapipes · v2 (at scale)
 
+## Try it on GitHub Pages
+
+| Version | Link | What it shows |
+|---|---|---|
+| Main | [jussikauhanen.github.io/datapipes](https://jussikauhanen.github.io/datapipes/) | 30 data flows: one line per flow, cards per flow, or one card per system |
+| v2 | [jussikauhanen.github.io/datapipes/v2](https://jussikauhanen.github.io/datapipes/v2/) | Copy of the main page |
+| v3 | [jussikauhanen.github.io/datapipes/v3](https://jussikauhanen.github.io/datapipes/v3/) | Sidebar of contracts and systems, live checkpoints (green, yellow, red), relationship diagrams per system |
+| v-beta | [jussikauhanen.github.io/datapipes/v-beta](https://jussikauhanen.github.io/datapipes/v-beta/) | Landscape map of everything, and a contract × system grid |
+
+Locally: run `python3 -m http.server 8000` in the repository root and open `http://localhost:8000/`, `/v3/` or `/v-beta/`. Opening `index.html` straight from disk does not load the data.
+
+All names, systems and numbers are invented.
+
 A separate copy of the prototype that tests the same idea at 30 flows. The simple version in the repository root is unchanged; v2 has its own page, styles, script and data.
 
 Open it at `http://localhost:8000/v2/` (run `python3 -m http.server 8000` in the repository root), or `/datapipes/v2/` on GitHub Pages.

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routa · Data contracts v3</title>
+<meta name="description" content="Sandbox prototype: data contracts, checkpoints and relationships between systems. Invented data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="appbar">
+  <button class="icon-btn side-toggle" type="button" id="side-toggle" aria-label="Show navigation" aria-expanded="false">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg>
+  </button>
+  <a class="logo" href="#/" aria-label="Routa data contracts, overview">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
+    <span>Routa Data</span>
+  </a>
+  <span class="vtag">v3 · sandbox</span>
+  <span class="spacer"></span>
+  <span class="clock" title="Simulated clock. Messages move faster than real time so you can watch them.">Sim <b id="clock">--:--:--</b></span>
+  <div class="seg" role="group" aria-label="Simulation speed">
+    <button type="button" data-speed="0" aria-pressed="false" title="Pause">❚❚</button>
+    <button type="button" data-speed="1" aria-pressed="false">1×</button>
+    <button type="button" data-speed="30" aria-pressed="true">30×</button>
+    <button type="button" data-speed="120" aria-pressed="false">120×</button>
+  </div>
+  <a class="btn beta-link" href="../v-beta/">Landscape (beta)</a>
+  <div class="menu-wrap">
+    <button class="btn primary" type="button" id="sim-btn" aria-haspopup="true" aria-expanded="false">Simulate ▾</button>
+    <div class="menu" id="sim-menu" role="menu" hidden></div>
+  </div>
+  <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Contracts and systems"></nav>
+  <main class="content" id="view" tabindex="-1"><p class="muted">Loading…</p></main>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

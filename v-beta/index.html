@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routa · Data landscape (beta)</title>
+<meta name="description" content="Sandbox prototype: every data contract and checkpoint on one screen, as a landscape map and a contract × system grid. Invented data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="v3parts.css">
+<link rel="stylesheet" href="beta.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="appbar">
+  <a class="logo" href="./" aria-label="Routa data landscape">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
+    <span>Routa Data</span>
+  </a>
+  <span class="vtag">beta · landscape</span>
+  <span class="spacer"></span>
+  <span class="clock" title="Simulated clock">Sim <b id="clock">--:--:--</b></span>
+  <div class="seg" role="group" aria-label="Simulation speed">
+    <button type="button" data-speed="0" aria-pressed="false" title="Pause">❚❚</button>
+    <button type="button" data-speed="1" aria-pressed="false">1×</button>
+    <button type="button" data-speed="30" aria-pressed="true">30×</button>
+    <button type="button" data-speed="120" aria-pressed="false">120×</button>
+  </div>
+  <div class="menu-wrap">
+    <button class="btn primary" type="button" id="sim-btn" aria-haspopup="true" aria-expanded="false">Simulate ▾</button>
+    <div class="menu" id="sim-menu" role="menu" hidden></div>
+  </div>
+  <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<main class="page">
+  <div class="intro">
+    <h1>The whole landscape at once</h1>
+    <p>Every data contract on one screen. In <b>Landscape</b>, each box is an area, each card a contract, each tile one checkpoint in the order the message passes it. In <b>Grid</b>, contracts are rows and systems are columns: read down a column to see everything that depends on one system. Colour by status, security level or owning team.</p>
+  </div>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-view="land" aria-pressed="true">Landscape</button>
+      <button type="button" data-view="grid" aria-pressed="false">Grid</button>
+    </div>
+    <select id="colour" aria-label="Colour by">
+      <option value="status">Colour by: Status</option>
+      <option value="security">Colour by: Security level</option>
+      <option value="team">Colour by: Owning team</option>
+    </select>
+    <label class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
+      <input id="q" type="search" placeholder="Find a contract or system" aria-label="Find a contract or system"></label>
+    <span class="spacer"></span>
+    <a class="btn" href="../v3/">Open v3</a>
+  </div>
+  <div class="layout">
+    <div id="stage"></div>
+    <aside class="legend" id="legend" aria-label="Legend"></aside>
+  </div>
+</main>
+
+<aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="dr-title" aria-hidden="true" tabindex="-1">
+  <div class="dr-head">
+    <div class="dr-crumb" id="dr-crumb"></div>
+    <button class="icon-btn" type="button" id="dr-close" aria-label="Close panel"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div class="dr-body" id="dr-body"></div>
+</aside>
+<div class="tip" id="tip" hidden></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

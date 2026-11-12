@@ -1,0 +1,326 @@
+{
+ "note": "The fake world behind the demo: which systems each contract really passes through, and the problems planted at start. The page never reads this to draw anything; it only sees the events the simulator emits.",
+ "contracts": {
+  "supplier-invoices": {
+   "path": [
+    "SRC-INV",
+    "INT-01",
+    "D365-FIN",
+    "APP-PRC",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 2950
+  },
+  "supplier-payments": {
+   "path": [
+    "SRC-BANK",
+    "INT-03",
+    "INT-01",
+    "D365-FIN",
+    "ANA-01"
+   ],
+   "records": 640
+  },
+  "project-budgets": {
+   "path": [
+    "SRC-EST",
+    "INT-01",
+    "D365-PO",
+    "APP-PRJ",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 38
+  },
+  "sales-invoices": {
+   "path": [
+    "D365-FIN",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 210
+  },
+  "gl-postings": {
+   "path": [
+    "D365-FIN",
+    "ANA-01"
+   ],
+   "records": 18400
+  },
+  "purchase-orders": {
+   "path": [
+    "SRC-PROC",
+    "INT-01",
+    "D365-FIN",
+    "APP-PRC",
+    "ANA-01"
+   ],
+   "records": 412
+  },
+  "supplier-compliance": {
+   "path": [
+    "SRC-CMP",
+    "INT-03",
+    "APP-PRC",
+    "ANA-01"
+   ],
+   "records": 57
+  },
+  "material-deliveries": {
+   "path": [
+    "SRC-DLV",
+    "INT-03",
+    "INT-01",
+    "D365-PO",
+    "APP-SITE",
+    "ANA-01"
+   ],
+   "records": 260
+  },
+  "project-master": {
+   "path": [
+    "D365-PO",
+    "APP-PRJ",
+    "APP-SITE",
+    "ANA-01"
+   ],
+   "records": 3
+  },
+  "schedules": {
+   "path": [
+    "SRC-SCH",
+    "INT-01",
+    "D365-PO",
+    "APP-PRJ",
+    "APP-CUS",
+    "ANA-01"
+   ],
+   "records": 140
+  },
+  "cost-forecasts": {
+   "path": [
+    "D365-PO",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 52
+  },
+  "change-orders": {
+   "path": [
+    "SRC-SITE",
+    "INT-01",
+    "D365-PO",
+    "APP-PRJ",
+    "ANA-01"
+   ],
+   "records": 12
+  },
+  "bim-models": {
+   "path": [
+    "SRC-BIM",
+    "INT-03",
+    "APP-PRJ",
+    "ANA-01"
+   ],
+   "records": 6
+  },
+  "site-checkins": {
+   "path": [
+    "SRC-GATE",
+    "INT-01",
+    "APP-SITE",
+    "ANA-01"
+   ],
+   "records": 2940
+  },
+  "moisture": {
+   "path": [
+    "SRC-IOT",
+    "INT-02",
+    "APP-SITE",
+    "ANA-01"
+   ],
+   "records": 8640
+  },
+  "site-diary": {
+   "path": [
+    "SRC-SITE",
+    "INT-01",
+    "APP-PRJ",
+    "ANA-01"
+   ],
+   "records": 31
+  },
+  "defects": {
+   "path": [
+    "SRC-SITE",
+    "INT-01",
+    "APP-WAR",
+    "ANA-01"
+   ],
+   "records": 74
+  },
+  "equipment-rental": {
+   "path": [
+    "SRC-RENT",
+    "INT-04",
+    "INT-01",
+    "D365-PO",
+    "ANA-01"
+   ],
+   "records": 95
+  },
+  "energy": {
+   "path": [
+    "SRC-NRG",
+    "INT-02",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 744
+  },
+  "reservations": {
+   "path": [
+    "SRC-CRM",
+    "INT-01",
+    "D365-FIN",
+    "APP-CUS",
+    "ANA-01"
+   ],
+   "records": 24
+  },
+  "buyer-contracts": {
+   "path": [
+    "SRC-CRM",
+    "INT-01",
+    "D365-FIN",
+    "APP-CUS",
+    "ANA-01"
+   ],
+   "records": 9
+  },
+  "customer-messages": {
+   "path": [
+    "SRC-PRT",
+    "INT-01",
+    "APP-CUS"
+   ],
+   "records": 130
+  },
+  "warranty-claims": {
+   "path": [
+    "SRC-PRT",
+    "INT-01",
+    "APP-WAR",
+    "ANA-01"
+   ],
+   "records": 41
+  },
+  "employees": {
+   "path": [
+    "SRC-HR",
+    "INT-01",
+    "D365-HR",
+    "APP-ESS",
+    "ANA-01"
+   ],
+   "records": 1840
+  },
+  "timesheets": {
+   "path": [
+    "SRC-TS",
+    "INT-01",
+    "D365-PO",
+    "D365-HR",
+    "ANA-01"
+   ],
+   "records": 5200
+  },
+  "training": {
+   "path": [
+    "SRC-TRN",
+    "INT-03",
+    "D365-HR",
+    "APP-SITE"
+   ],
+   "records": 220
+  },
+  "waste": {
+   "path": [
+    "SRC-WST",
+    "INT-04",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 18
+  },
+  "carbon": {
+   "path": [
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 5
+  },
+  "cash-forecast": {
+   "path": [
+    "D365-FIN",
+    "ANA-01",
+    "ANA-02"
+   ],
+   "records": 13
+  },
+  "supplier-master": {
+   "path": [
+    "SRC-PROC",
+    "INT-01",
+    "D365-FIN",
+    "APP-PRC",
+    "ANA-01"
+   ],
+   "records": 1210
+  }
+ },
+ "planted": [
+  {
+   "type": "fail",
+   "flow": "supplier-invoices",
+   "system": "INT-01",
+   "message": "Mapping error: po_number missing in 112 of 2 950 rows",
+   "profile": {
+    "po_number": {
+     "missing": 112
+    }
+   }
+  },
+  {
+   "type": "fail",
+   "flow": "equipment-rental",
+   "system": "INT-04",
+   "message": "File not found: rental_20261112.csv"
+  },
+  {
+   "type": "fail",
+   "flow": "training",
+   "system": "D365-HR",
+   "message": "Employee not found for 14 certificates"
+  },
+  {
+   "type": "stop",
+   "flow": "site-checkins",
+   "since_min": 140
+  },
+  {
+   "type": "slow",
+   "flow": "timesheets",
+   "system": "ANA-01",
+   "delay_min": 11
+  },
+  {
+   "type": "slow",
+   "flow": "purchase-orders",
+   "system": "D365-FIN",
+   "delay_min": 22
+  }
+ ]
+}
