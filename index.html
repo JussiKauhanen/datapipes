@@ -42,11 +42,18 @@
   <section id="board" class="section">
     <div class="section-head">
       <h2>Pipeline board</h2>
-      <span class="hint">One row per data flow · click a box for its last event</span>
+      <span class="hint">A lane per data flow · click a card for details</span>
     </div>
-    <div class="board-wrap"><div class="board" id="board-grid"></div></div>
-    <div class="legend" id="legend"></div>
-    <div id="detail" class="detail" aria-live="polite"></div>
+    <div class="canvas">
+      <div class="board-tools">
+        <div class="legend" id="legend"></div>
+        <div class="tool-btns">
+          <button class="btn ghost sm" type="button" id="expand-all">Expand all</button>
+          <button class="btn ghost sm" type="button" id="collapse-ok">Collapse running flows</button>
+        </div>
+      </div>
+      <div class="board-wrap"><div class="board" id="board-grid"></div></div>
+    </div>
   </section>
 
   <section id="event" class="section">
@@ -99,6 +106,16 @@
     <ol class="feed" id="feed-list"></ol>
   </section>
 </main>
+
+<aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="dr-title" aria-hidden="true" tabindex="-1">
+  <div class="dr-head">
+    <div class="dr-crumb" id="dr-crumb"></div>
+    <button class="dr-x" type="button" id="dr-close" aria-label="Close panel">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    </button>
+  </div>
+  <div class="dr-body" id="dr-body"></div>
+</aside>
 
 <footer class="foot">
   Routa Rakennus Oyj and every system, person and number here are invented. Register in <code>data/register.json</code>, seed events in <code>data/events.json</code>; seed times are shifted to “now” when the page loads.

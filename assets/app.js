@@ -60,7 +60,7 @@
         const c = { flow: f, stage: st, col, sys: s, e, key: `${f.id}|${id}` };
         if (broken) { c.status = 'waiting'; c.why = `Waiting on ${broken.sys.name} (${broken.status}). Its data here is from the last good run.`; }
         else if (!e) { c.status = 'waiting'; c.why = 'No event received yet.'; }
-        else if (e.status === 'failed') { c.status = 'failed'; c.why = e.message || 'The run failed.'; }
+        else if (e.status === 'failed') { c.status = 'failed'; c.why = e.message ? (/[.!?]$/.test(e.message) ? e.message : e.message + '.') : 'The run failed.'; }
         else if (prev && prev.e && SEC[prev.e.security_level] > SEC[s.clearance]) {
           c.status = 'blocked'; c.fixer = prev.sys;
           c.why = `${prev.sys.name} sends ${prev.e.security_level} data, but ${s.name} is cleared for ${s.clearance} only. The data is held back.`;
@@ -143,11 +143,19 @@
   ];
 
   // ---------- render ----------
+  const collapsed = new Set();
+  const loz = (s) => `<span class="loz ${esc(s)}">${esc(s)}</span>`;
+  const initials = (n) => n.split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+  const avColor = (n) => [...n].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6;
+  const av = (n, lg) => `<span class="av c${avColor(n)}${lg ? ' lg' : ''}" title="${esc(n)}" aria-hidden="true">${esc(initials(n))}</span>`;
+
+  let lastB = [];
   function render() {
     const B = board();
+    lastB = B;
     renderAlerts(B);
     renderBoard(B);
-    renderDetail(B);
+    renderDrawer(B);
     renderFeed();
   }
 
@@ -155,7 +163,7 @@
     const bad = B.filter((b) => b.broken);
     const items = bad.map((b) => {
       const c = b.broken, who = c.fixer || c.sys;
-      return `<li data-key="${esc(c.key)}" tabindex="0">
+      return `<li data-key="${esc(c.key)}" tabindex="0" role="button">
         <span>${chip(c.status)}</span>
         <span class="where"><b>${esc(b.flow.name)}</b><span>${esc(c.stage.name)} · ${esc(c.sys.id)}</span></span>
         <span class="what">${esc(c.why)}${b.downstream.length ? ` <span class="muted">Stops: ${b.downstream.map((d) => esc(d.sys.name)).join(', ')}.</span>` : ''}</span>
@@ -170,61 +178,122 @@
       </div>
       ${bad.length ? `<ul>${items}</ul>` : '<div class="none">All flows ran on time. Send an example below to break one.</div>'}`;
     $$('#alerts li').forEach((li) => {
-      const go = () => { select(li.dataset.key); $('#board').scrollIntoView(); };
+      const go = () => open(li.dataset.key, true);
       li.addEventListener('click', go);
-      li.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+      li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     });
   }
 
   function renderBoard(B) {
-    const head = `<div></div>` + R.stages.map((s, i) => `<div class="colhead"><span class="n">${pad(i + 1)}</span>${esc(s.name)}</div>`).join('');
-    const rows = B.map((b) => {
-      const f = b.flow;
-      const label = `<div class="flow"><h3>${esc(f.name)}</h3>
-        <div class="meta">${esc(f.contract)}<br>${esc(every(f.every_min))} · ${lvl(f.security_level)}</div></div>`;
-      const cells = b.cells.map((c) => {
-        const last = c.col === R.stages.length - 1 ? ' last' : '';
-        if (c.na) return `<div class="na${last}"><span>not used</span></div>`;
-        return `<button type="button" class="cell s-${c.status}${last}${selected === c.key ? ' sel' : ''}" data-key="${esc(c.key)}" aria-label="${esc(`${f.name}, ${c.stage.name}: ${c.sys.name}, ${c.status}`)}">
-          <span class="top"><span class="id">${esc(c.sys.id)}</span>${c.e ? lvl(c.e.security_level) : ''}</span>
-          <span class="name">${esc(c.sys.name)}</span>
-          <span class="owner">${esc(c.sys.owner)}</span>
-          <span class="stat">${chip(c.status)}${c.e ? `<span>${esc(hhmm(c.e.date))}</span>` : ''}</span>
-        </button>`;
+    const perCol = R.stages.map((_, i) => {
+      const cs = B.map((b) => b.cells[i]).filter((c) => !c.na);
+      return { n: cs.length, bad: cs.filter((c) => ['failed', 'blocked', 'late'].includes(c.status)).length };
+    });
+    const head = `<div class="cols">${R.stages.map((s, i) => `<div class="col-h"><span>${esc(s.name)}</span><span class="cnt">${perCol[i].n}${perCol[i].bad ? ` · <b>${perCol[i].bad} stopped</b>` : ''}</span></div>`).join('')}</div>`;
+    const caret = '<svg class="caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
+    const lanes = B.map((b) => {
+      const f = b.flow, isCol = collapsed.has(f.id);
+      const state = b.broken
+        ? `<span class="state ${b.broken.status === 'late' ? 'warn' : 'bad'}">${b.broken.status === 'late' ? 'Late' : b.broken.status === 'blocked' ? 'Blocked' : 'Stopped'} at ${esc(b.broken.stage.name)} · ${esc((b.broken.fixer || b.broken.sys).owner)}</span>`
+        : `<span class="state">${chip('ok')} flowing</span>`;
+      const slots = b.cells.map((c, i) => {
+        const cut = b.broken && i >= b.broken.col && i < R.stages.length - 1 ? ' cut' : '';
+        if (c.na) return `<div class="slot${cut}"><div class="empty">not used</div></div>`;
+        const showMsg = ['failed', 'blocked', 'late'].includes(c.status);
+        return `<div class="slot${cut}"><button type="button" class="card s-${c.status}${selected === c.key ? ' sel' : ''}" data-key="${esc(c.key)}"
+            aria-label="${esc(`${c.sys.name}, ${c.stage.name}, ${f.name}: ${c.status}. Owner ${c.sys.owner}`)}">
+          <span class="ttl-row"><span class="ttl">${esc(c.sys.name)}</span>${c.e ? lvl(c.e.security_level) : ''}</span>
+          ${showMsg ? `<span class="msg">${esc(c.why)}</span>` : ''}
+          <span class="cfoot"><span class="key">${esc(c.sys.id)}</span>${loz(c.status)}<span class="sp"></span>${av(c.sys.owner)}</span>
+        </button></div>`;
       }).join('');
-      return label + cells;
+      return `<div class="lane${isCol ? ' collapsed' : ''}" data-flow="${esc(f.id)}">
+        <button type="button" class="lane-h" aria-expanded="${!isCol}">${caret}<span class="t">${esc(f.name)}</span>
+          <span class="m">${esc(f.contract)} · ${esc(every(f.every_min))}</span>${lvl(f.security_level)}${state}</button>
+        <div class="lane-row">${slots}</div>
+      </div>`;
     }).join('');
-    $('#board-grid').innerHTML = head + rows;
-    $$('#board-grid .cell').forEach((el) => el.addEventListener('click', () => select(selected === el.dataset.key ? null : el.dataset.key)));
+    $('#board-grid').innerHTML = head + lanes;
+    $$('#board-grid .card').forEach((el) => el.addEventListener('click', () => (selected === el.dataset.key && drawerOpen() ? close() : open(el.dataset.key))));
+    $$('#board-grid .lane-h').forEach((el) => el.addEventListener('click', () => {
+      const id = el.closest('.lane').dataset.flow;
+      collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
+      renderBoard(lastB);
+    }));
   }
 
-  function renderDetail(B) {
-    const box = $('#detail');
-    const c = selected && B.flatMap((b) => b.cells).find((x) => x.key === selected);
-    if (!c) { box.innerHTML = ''; return; }
-    const who = c.fixer || c.sys;
-    box.innerHTML = `<div class="box">
-      <div>
-        <button class="btn ghost close" type="button" aria-label="Close">Close</button>
-        <h3 style="font-size:17px">${esc(c.sys.name)} <span class="muted" style="font:500 13px var(--mono)">${esc(c.sys.id)}</span></h3>
-        <div class="muted small">${esc(c.flow.name)} · ${esc(c.stage.name)}</div>
-        <dl class="kv">
-          <dt>Status</dt><dd>${chip(c.status)}</dd>
-          <dt>Owner</dt><dd>${esc(c.sys.owner)}, ${esc(c.sys.team)}</dd>
-          ${c.fixer ? `<dt>Who fixes</dt><dd>${esc(who.owner)}, ${esc(who.team)} (sender)</dd>` : ''}
-          <dt>Contract</dt><dd><code>${esc(c.flow.contract)}</code> · ${esc(every(c.flow.every_min))}</dd>
-          <dt>Data out</dt><dd>${c.e ? lvl(c.e.security_level, true) : '—'}</dd>
-          <dt>Cleared for</dt><dd>${lvl(c.sys.clearance, true)} and below</dd>
-          <dt>Last event</dt><dd>${c.e ? esc(ago(c.e.date)) : '—'}</dd>
-        </dl>
-        <p class="why">${esc(c.why)}</p>
-      </div>
-      <div>
-        <div class="muted small" style="margin-bottom:8px">Last event from ${esc(c.sys.id)} for this flow</div>
-        ${c.e ? `<pre class="code">${jsonHtml(strip(c.e), ['status', 'security_level', 'message'])}</pre>` : '<p class="muted">None yet.</p>'}
-      </div>
-    </div>`;
-    $('.close', box).addEventListener('click', () => select(null));
+  // ---------- side panel ----------
+  const drawer = $('#drawer');
+  let returnFocus = null;
+  const drawerOpen = () => drawer.classList.contains('open');
+
+  function open(key, flash) {
+    if (!drawerOpen()) returnFocus = document.activeElement;
+    selected = key;
+    const flowId = key.split('|')[0];
+    collapsed.delete(flowId);
+    render();
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    drawer.focus({ preventScroll: true });
+    if (flash) {
+      const el = $(`#board-grid .card[data-key="${CSS.escape(key)}"]`);
+      if (el) {
+        el.classList.add('flash');
+        const r = el.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ block: 'center' });
+      }
+    }
+  }
+  function close() {
+    selected = null;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    render();
+    if (returnFocus && document.contains(returnFocus)) returnFocus.focus({ preventScroll: true });
+  }
+  $('#dr-close').addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawerOpen()) close(); });
+
+  function renderDrawer(B) {
+    const b = selected && B.find((x) => x.cells.some((c) => c.key === selected));
+    const c = b && b.cells.find((x) => x.key === selected);
+    if (!c) { $('#dr-body').innerHTML = ''; $('#dr-crumb').innerHTML = ''; return; }
+    const f = c.flow, who = c.fixer || c.sys;
+    const hist = events.filter((e) => e.flow === f.id && e.system_id === c.sys.id).sort((x, y) => Date.parse(y.date) - Date.parse(x.date)).slice(0, 6);
+    const headline = {
+      ok: 'Running', failed: 'This step failed', blocked: 'Data held back at this step', late: 'This step has gone quiet', waiting: 'Held up earlier in the pipe',
+    }[c.status];
+    const chain = b.cells.filter((x) => !x.na).map((x) =>
+      `<button type="button" class="hop s-${x.status}${x.key === c.key ? ' me' : ''}" data-key="${esc(x.key)}" title="${esc(`${x.sys.name}: ${x.status}`)}">${esc(x.sys.id)}</button>`).join('<span class="arr">→</span>');
+
+    $('#dr-crumb').innerHTML = `${esc(f.name)} / ${esc(c.stage.name)} / <b>${esc(c.sys.id)}</b>`;
+    $('#dr-body').innerHTML = `
+      <h2 id="dr-title">${esc(c.sys.name)}</h2>
+      <div>${loz(c.status)}</div>
+      <div class="callout ${c.status}"><b>${esc(headline)}</b>${esc(c.why)}${b.broken && b.broken.key === c.key && b.downstream.length ? ` Stops ${b.downstream.map((d) => esc(d.sys.name)).join(', ')}.` : ''}</div>
+
+      <h4>Where in the pipe</h4>
+      <div class="chain">${chain}</div>
+
+      <h4>Details</h4>
+      <dl class="fields">
+        <dt>Owner</dt><dd>${av(c.sys.owner, true)}<span>${esc(c.sys.owner)}<br><small>${esc(c.sys.team)}</small></span></dd>
+        ${c.fixer ? `<dt>Who fixes</dt><dd>${av(who.owner, true)}<span>${esc(who.owner)}<br><small>${esc(who.team)} · sends the data</small></span></dd>` : ''}
+        ${c.status === 'waiting' && b.broken ? `<dt>Waiting on</dt><dd>${esc(b.broken.sys.name)} <small>${esc((b.broken.fixer || b.broken.sys).owner)}</small></dd>` : ''}
+        <dt>Contract</dt><dd><code>${esc(f.contract)}</code></dd>
+        <dt>Runs</dt><dd>${esc(every(f.every_min))}</dd>
+        <dt>Data out</dt><dd>${c.e ? lvl(c.e.security_level, true) : '—'}</dd>
+        <dt>Cleared for</dt><dd>${lvl(c.sys.clearance, true)} <small>and below</small></dd>
+        <dt>Last event</dt><dd>${c.e ? `${esc(hhmm(c.e.date))} <small>${esc(ago(c.e.date))}</small>` : '—'}</dd>
+      </dl>
+
+      <h4>Last event received</h4>
+      ${c.e ? `<pre class="code">${jsonHtml(strip(c.e), ['status', 'security_level', 'message'])}</pre>` : '<p class="muted">None yet.</p>'}
+
+      <h4>History</h4>
+      <ul class="hist">${hist.map((e) => `<li><span class="t">${esc(hhmm(e.date))}</span>${loz(e.status)}${lvl(e.security_level)}<span class="m">${esc(e.message || '')}</span></li>`).join('') || '<li class="muted">No events.</li>'}</ul>`;
+    $$('#dr-body .hop').forEach((h) => h.addEventListener('click', () => open(h.dataset.key, true)));
   }
 
   function renderFeed() {
@@ -238,15 +307,6 @@
   }
   const strip = (e) => { const { _new, ...rest } = e; return rest; };
 
-  function select(key, flash) {
-    selected = key;
-    render();
-    if (key && flash) {
-      const el = $(`#board-grid .cell[data-key="${CSS.escape(key)}"]`);
-      if (el) { el.classList.add('flash'); el.scrollIntoView({ block: 'center', inline: 'center' }); }
-    }
-  }
-
   function renderStatic() {
     $('#schema-json').innerHTML = jsonHtml(strip(events.find((e) => e.system_id === 'INT-01' && e.flow === 'supplier-invoices')));
 
@@ -259,15 +319,15 @@
       <ol>${x.then.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
       <div class="foot-row"><button class="btn" type="button" data-ex="${i}">${esc(x.button)}</button><span class="result" data-res="${i}"></span></div>
     </article>`).join('');
-    $$('[data-ex]').forEach((b) => b.addEventListener('click', () => {
-      const i = +b.dataset.ex, x = EXAMPLES[i];
-      if (x.show) { select(x.show, true); return; }
+    $$('[data-ex]').forEach((btn) => btn.addEventListener('click', () => {
+      const i = +btn.dataset.ex, x = EXAMPLES[i];
+      if (x.show) { open(x.show, true); return; }
       const e = x.make();
       e._new = true;
       events.push(e);
-      $(`[data-res="${i}"]`).textContent = `Sent at ${hhmm(e.date)}.`;
+      $(`[data-res="${i}"]`).textContent = `Sent at ${hhmm(e.date)}. See the panel on the right.`;
       $(`[data-json="${i}"]`).innerHTML = jsonHtml(x.make(), x.mark);
-      select(`${e.flow}|${e.system_id}`, true);
+      open(`${e.flow}|${e.system_id === 'INT-01' && e.security_level === 'secret' ? 'D365-FIN' : e.system_id}`, true);
     }));
 
     $('#levels').innerHTML = `<table>
@@ -277,14 +337,18 @@
         <td class="small">${R.systems.filter((s) => SEC[s.clearance] >= SEC[l.id]).map((s) => `<code>${esc(s.id)}</code>`).join(' ')}</td>
       </tr>`).join('')}</tbody></table>`;
 
-    $('#legend').innerHTML = ['ok', 'failed', 'blocked', 'late', 'waiting'].map((s) => `<span>${chip(s)}<span class="muted">${{
-      ok: 'ran on time', failed: 'system reported an error', blocked: 'data too secret for this system', late: 'no event in time', waiting: 'held up by a step before it',
+    $('#legend').innerHTML = ['ok', 'failed', 'blocked', 'late', 'waiting'].map((s) => `<span>${loz(s)}<span class="muted">${{
+      ok: 'ran on time', failed: 'reported an error', blocked: 'data too secret for it', late: 'no event in time', waiting: 'held up earlier',
     }[s]}</span></span>`).join('');
+
+    $('#expand-all').addEventListener('click', () => { collapsed.clear(); renderBoard(lastB); });
+    $('#collapse-ok').addEventListener('click', () => { lastB.filter((b) => !b.broken).forEach((b) => collapsed.add(b.flow.id)); renderBoard(lastB); });
 
     $('#reset').addEventListener('click', () => {
       events = seed.map((e) => ({ ...e }));
       $$('[data-res]').forEach((r) => (r.textContent = ''));
-      select(null);
+      collapsed.clear();
+      close();
       $('#board').scrollIntoView();
     });
   }
