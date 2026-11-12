@@ -3,74 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Routa · Data pipeline status</title>
+<title>Routa · Pipeline status</title>
 <meta name="description" content="Sandbox prototype: where data stopped in the pipeline, and who owns that step. Invented data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231d1c19'/%3E%3Cpath d='M2 11h12M2 13.5h12' stroke='%23e0541b' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
 </head>
 <body>
-<header class="masthead">
-  <div class="masthead-inner">
-    <a class="brand" href="#top">
-      <svg class="brand-mark" viewBox="0 0 20 20" aria-hidden="true"><rect width="20" height="20"/><path d="M3 13h14M3 16h14"/></svg>
-      <span class="brand-name">Routa</span>
-      <span class="brand-sub">Data pipeline status</span>
-    </a>
-    <span class="sandbox-tag" title="All names, systems and numbers are invented.">Sandbox · invented data</span>
-    <button class="theme-toggle" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+<header class="appbar">
+  <a class="logo" href="#top" aria-label="Routa data pipeline status">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
+    <span>Routa Data</span>
+  </a>
+  <span class="spacer"></span>
+  <div class="menu-wrap">
+    <button class="btn primary" type="button" id="send-btn" aria-haspopup="true" aria-expanded="false">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>Send event
+    </button>
+    <div class="menu" id="send-menu" role="menu" hidden></div>
   </div>
-  <nav class="tabs" aria-label="Sections">
-    <a href="#board">Board</a>
-    <a href="#event">The event</a>
-    <a href="#examples">What happens when…</a>
-    <a href="#security">Security levels</a>
-    <a href="#feed">Feed</a>
-  </nav>
+  <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+  </button>
 </header>
 
-<main id="top">
-  <section class="intro">
-    <h1>Where did the data stop, and who owns that step?</h1>
-    <p class="lede">Every system in a pipeline sends one small event each time it runs. Put those events side by side and three questions answer themselves: what flows where, where it broke, and who to call.</p>
-  </section>
+<div class="pagehead" id="top">
+  <div class="crumbs">Spaces <span>/</span> Data platform</div>
+  <div class="title-row">
+    <h1>Pipeline status</h1>
+    <span class="sandbox">Sandbox · invented data</span>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#board" class="active"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M6 3v10M10 3v10"/></svg>Board</a>
+    <a href="#event"><svg viewBox="0 0 16 16"><path d="M5 3H4a1 1 0 0 0-1 1v3l-1 1 1 1v3a1 1 0 0 0 1 1h1M11 3h1a1 1 0 0 1 1 1v3l1 1-1 1v3a1 1 0 0 1-1 1h-1"/></svg>The event</a>
+    <a href="#examples"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.5 5.5l4 2.5-4 2.5z"/></svg>What happens when…</a>
+    <a href="#security"><svg viewBox="0 0 16 16"><rect x="3.5" y="7" width="9" height="6.5" rx="1"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>Security levels</a>
+    <a href="#feed"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Feed</a>
+  </nav>
+</div>
+
+<main>
+  <p class="lede">Every system in a pipeline sends one small event each time it runs. Put those events side by side and three questions answer themselves: <b>what flows where</b>, <b>where it broke</b>, and <b>who to call</b>.</p>
 
   <section id="alerts" class="alerts" aria-live="polite"></section>
 
-  <section id="board" class="section">
-    <div class="section-head">
-      <h2>Pipeline board</h2>
-      <span class="hint">A lane per data flow · click a card for details</span>
+  <section id="board">
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
+        <input type="search" id="q" placeholder="Search board" aria-label="Search board">
+      </label>
+      <div class="avatars" id="owners" role="group" aria-label="Filter by owner"></div>
+      <select id="f-status" aria-label="Status filter">
+        <option value="all">Status: all</option>
+        <option value="stopped">Status: stopped only</option>
+      </select>
+      <select id="f-level" aria-label="Security level filter">
+        <option value="all">Security: all</option>
+        <option value="secret">Security: secret</option>
+        <option value="confidential">Security: confidential</option>
+        <option value="internal">Security: internal</option>
+      </select>
+      <span class="spacer"></span>
+      <button class="btn toggle" type="button" id="group" aria-pressed="true">Group: Flow</button>
+      <button class="icon-btn bordered" type="button" id="reset" aria-label="Reset the board" title="Reset the board">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.5M3 2.5V5h2.5"/></svg>
+      </button>
     </div>
-    <div class="canvas">
-      <div class="board-tools">
-        <div class="legend" id="legend"></div>
-        <div class="tool-btns">
-          <button class="btn ghost sm" type="button" id="expand-all">Expand all</button>
-          <button class="btn ghost sm" type="button" id="collapse-ok">Collapse running flows</button>
-        </div>
-      </div>
-      <div class="board-wrap"><div class="board" id="board-grid"></div></div>
-    </div>
+    <div class="board-wrap"><div class="board" id="board-grid"></div></div>
+    <div class="legend" id="legend"></div>
   </section>
 
   <section id="event" class="section">
-    <div class="section-head">
-      <h2>The event every system sends</h2>
-      <span class="hint">Same shape at every stage</span>
-    </div>
+    <h2>The event every system sends</h2>
+    <p class="sub">Same shape at every stage. The owner is not in it: it is looked up from the system register by <code>system_id</code>, so the event stays small and ownership changes in one place.</p>
     <div class="two">
       <pre class="code" id="schema-json"></pre>
-      <div class="table-wrap">
+      <div class="panel">
         <table>
           <thead><tr><th>Field</th><th>What it says</th></tr></thead>
           <tbody>
-            <tr><td><code>system_id</code>, <code>system_name</code></td><td>Who is reporting. The owner is looked up from the system register by <code>system_id</code>, so the event stays small and ownership changes in one place.</td></tr>
+            <tr><td><code>system_id</code>, <code>system_name</code></td><td>Who is reporting.</td></tr>
             <tr><td><code>stage</code></td><td>Where in the pipe: source, integration, dynamics, apps or analytics.</td></tr>
-            <tr><td><code>flow</code></td><td>Which data flow (and so which data contract) this run belongs to.</td></tr>
-            <tr><td><code>source</code></td><td>The system it got the data from. This is what links the steps into a chain. Empty for a source system.</td></tr>
+            <tr><td><code>flow</code></td><td>Which data flow, and so which data contract, this run belongs to.</td></tr>
+            <tr><td><code>source</code></td><td>The system it got the data from. This links the steps into a chain. Empty for a source system.</td></tr>
             <tr><td><code>status</code></td><td><code>ok</code> or <code>failed</code>. The platform adds <code>late</code>, <code>waiting</code> and <code>blocked</code> itself.</td></tr>
             <tr><td><code>date</code></td><td>When the run finished. No event for too long means the step is late.</td></tr>
             <tr><td><code>security_level</code></td><td>How secret the data is <em>as it leaves this system</em>. The next system must be cleared for that level.</td></tr>
@@ -82,36 +100,29 @@
   </section>
 
   <section id="examples" class="section">
-    <div class="section-head">
-      <h2>What happens when…</h2>
-      <span class="hint">Send an example into the board above</span>
-    </div>
+    <h2>What happens when…</h2>
+    <p class="sub">Each example is one event. Send it and the board and side panel show the result.</p>
     <div class="examples" id="examples-grid"></div>
-    <div class="row"><button class="btn ghost" type="button" id="reset">Reset the board</button></div>
   </section>
 
   <section id="security" class="section">
-    <div class="section-head">
-      <h2>Security levels</h2>
-      <span class="hint">Each system has a clearance; data above it is stopped at the door</span>
-    </div>
-    <div class="table-wrap" id="levels"></div>
+    <h2>Security levels</h2>
+    <p class="sub">Each system is cleared up to a level. Data above it is stopped at the door, and the sender is the one who fixes it.</p>
+    <div class="panel" id="levels"></div>
   </section>
 
   <section id="feed" class="section">
-    <div class="section-head">
-      <h2>Feed</h2>
-      <span class="hint">Newest first · in production this is the event endpoint</span>
-    </div>
-    <ol class="feed" id="feed-list"></ol>
+    <h2>Feed</h2>
+    <p class="sub">Every event received, newest first. In production this is the event endpoint.</p>
+    <ol class="feed panel" id="feed-list"></ol>
   </section>
 </main>
 
 <aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="dr-title" aria-hidden="true" tabindex="-1">
   <div class="dr-head">
     <div class="dr-crumb" id="dr-crumb"></div>
-    <button class="dr-x" type="button" id="dr-close" aria-label="Close panel">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+    <button class="icon-btn" type="button" id="dr-close" aria-label="Close panel">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
     </button>
   </div>
   <div class="dr-body" id="dr-body"></div>
