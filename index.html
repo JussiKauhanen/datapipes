@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Routa · Data contracts</title>
-<meta name="description" content="Sandbox prototype: data contracts, events, dependencies and owners on one page. Invented data.">
+<title>Routa · Data pipeline status</title>
+<meta name="description" content="Sandbox prototype: where data stopped in the pipeline, and who owns that step. Invented data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,30 +14,94 @@
 <body>
 <header class="masthead">
   <div class="masthead-inner">
-    <a class="brand" href="#/">
+    <a class="brand" href="#top">
       <svg class="brand-mark" viewBox="0 0 20 20" aria-hidden="true"><rect width="20" height="20"/><path d="M3 13h14M3 16h14"/></svg>
       <span class="brand-name">Routa</span>
-      <span class="brand-sub">Data contracts</span>
+      <span class="brand-sub">Data pipeline status</span>
     </a>
-    <span class="sandbox-tag" title="All names, projects, business IDs and numbers are invented.">Sandbox · invented data</span>
+    <span class="sandbox-tag" title="All names, systems and numbers are invented.">Sandbox · invented data</span>
     <button class="theme-toggle" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
   </div>
   <nav class="tabs" aria-label="Sections">
-    <a href="#/" data-route="overview">Overview</a>
-    <a href="#/contracts" data-route="contracts">Contracts</a>
-    <a href="#/lineage" data-route="lineage">Lineage</a>
-    <a href="#/events" data-route="events">Event stream</a>
-    <a href="#/owners" data-route="owners">Owners</a>
-    <a href="#/sandbox" data-route="sandbox">Sandbox</a>
+    <a href="#board">Board</a>
+    <a href="#event">The event</a>
+    <a href="#examples">What happens when…</a>
+    <a href="#security">Security levels</a>
+    <a href="#feed">Feed</a>
   </nav>
 </header>
 
-<main id="view" tabindex="-1">
-  <p class="loading">Loading catalogue…</p>
+<main id="top">
+  <section class="intro">
+    <h1>Where did the data stop, and who owns that step?</h1>
+    <p class="lede">Every system in a pipeline sends one small event each time it runs. Put those events side by side and three questions answer themselves: what flows where, where it broke, and who to call.</p>
+  </section>
+
+  <section id="alerts" class="alerts" aria-live="polite"></section>
+
+  <section id="board" class="section">
+    <div class="section-head">
+      <h2>Pipeline board</h2>
+      <span class="hint">One row per data flow · click a box for its last event</span>
+    </div>
+    <div class="board-wrap"><div class="board" id="board-grid"></div></div>
+    <div class="legend" id="legend"></div>
+    <div id="detail" class="detail" aria-live="polite"></div>
+  </section>
+
+  <section id="event" class="section">
+    <div class="section-head">
+      <h2>The event every system sends</h2>
+      <span class="hint">Same shape at every stage</span>
+    </div>
+    <div class="two">
+      <pre class="code" id="schema-json"></pre>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>What it says</th></tr></thead>
+          <tbody>
+            <tr><td><code>system_id</code>, <code>system_name</code></td><td>Who is reporting. The owner is looked up from the system register by <code>system_id</code>, so the event stays small and ownership changes in one place.</td></tr>
+            <tr><td><code>stage</code></td><td>Where in the pipe: source, integration, dynamics, apps or analytics.</td></tr>
+            <tr><td><code>flow</code></td><td>Which data flow (and so which data contract) this run belongs to.</td></tr>
+            <tr><td><code>source</code></td><td>The system it got the data from. This is what links the steps into a chain. Empty for a source system.</td></tr>
+            <tr><td><code>status</code></td><td><code>ok</code> or <code>failed</code>. The platform adds <code>late</code>, <code>waiting</code> and <code>blocked</code> itself.</td></tr>
+            <tr><td><code>date</code></td><td>When the run finished. No event for too long means the step is late.</td></tr>
+            <tr><td><code>security_level</code></td><td>How secret the data is <em>as it leaves this system</em>. The next system must be cleared for that level.</td></tr>
+            <tr><td><code>message</code></td><td>Optional. One line on what went wrong.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="examples" class="section">
+    <div class="section-head">
+      <h2>What happens when…</h2>
+      <span class="hint">Send an example into the board above</span>
+    </div>
+    <div class="examples" id="examples-grid"></div>
+    <div class="row"><button class="btn ghost" type="button" id="reset">Reset the board</button></div>
+  </section>
+
+  <section id="security" class="section">
+    <div class="section-head">
+      <h2>Security levels</h2>
+      <span class="hint">Each system has a clearance; data above it is stopped at the door</span>
+    </div>
+    <div class="table-wrap" id="levels"></div>
+  </section>
+
+  <section id="feed" class="section">
+    <div class="section-head">
+      <h2>Feed</h2>
+      <span class="hint">Newest first · in production this is the event endpoint</span>
+    </div>
+    <ol class="feed" id="feed-list"></ol>
+  </section>
 </main>
 
 <footer class="foot">
-  <span>Routa Rakennus Oyj is fictional. Contracts live in <code>data/catalog.json</code>; the event stream is simulated in the browser.</span>
+  Routa Rakennus Oyj and every system, person and number here are invented. Register in <code>data/register.json</code>, seed events in <code>data/events.json</code>; seed times are shifted to “now” when the page loads.
 </footer>
 
 <script src="assets/app.js"></script>

@@ -1,0 +1,47 @@
+{
+  "company": "Routa Rakennus Oyj (fictional)",
+
+  "stages": [
+    { "id": "source",      "name": "Source" },
+    { "id": "integration", "name": "Integration" },
+    { "id": "dynamics",    "name": "Dynamics 365" },
+    { "id": "apps",        "name": "Apps" },
+    { "id": "analytics",   "name": "Analytics" }
+  ],
+
+  "security_levels": [
+    { "id": "public",       "fi": "Julkinen",          "rule": "No restrictions." },
+    { "id": "internal",     "fi": "Sisäinen",          "rule": "Company network and named services only." },
+    { "id": "confidential", "fi": "Luottamuksellinen", "rule": "Encrypted in transit, access logged, named roles only." },
+    { "id": "secret",       "fi": "Salainen",          "rule": "Identifiable personal data. Stays in source and integration; must be pseudonymised before it moves on." }
+  ],
+
+  "systems": [
+    { "id": "SRC-INV",  "name": "E-invoice operator",     "stage": "source",      "owner": "Aino Lehtinen",  "team": "Finance",              "clearance": "confidential" },
+    { "id": "SRC-EST",  "name": "Estimating tool",        "stage": "source",      "owner": "Kari Nieminen",  "team": "Cost engineering",     "clearance": "internal" },
+    { "id": "SRC-GATE", "name": "Site gate readers",      "stage": "source",      "owner": "Petri Laine",    "team": "Site operations",      "clearance": "secret" },
+    { "id": "SRC-IOT",  "name": "Moisture sensors",       "stage": "source",      "owner": "Laura Salo",     "team": "Quality",              "clearance": "internal" },
+    { "id": "SRC-CRM",  "name": "Sales CRM",              "stage": "source",      "owner": "Henna Järvinen", "team": "Residential sales",    "clearance": "secret" },
+    { "id": "INT-01",   "name": "Integration hub",        "stage": "integration", "owner": "Noora Ahonen",   "team": "Integration team",     "clearance": "secret" },
+    { "id": "INT-02",   "name": "IoT hub",                "stage": "integration", "owner": "Noora Ahonen",   "team": "Integration team",     "clearance": "internal" },
+    { "id": "D365-FIN", "name": "Dynamics 365 Finance",   "stage": "dynamics",    "owner": "Ville Koskinen", "team": "ERP team",             "clearance": "confidential" },
+    { "id": "APP-PRC",  "name": "Procurement app",        "stage": "apps",        "owner": "Joonas Mäkelä",  "team": "Procurement",          "clearance": "confidential" },
+    { "id": "APP-PRJ",  "name": "Project app",            "stage": "apps",        "owner": "Aino Lehtinen",  "team": "Project controlling",  "clearance": "confidential" },
+    { "id": "APP-SITE", "name": "Site app",               "stage": "apps",        "owner": "Elina Rantanen", "team": "Site operations",      "clearance": "confidential" },
+    { "id": "APP-CUS",  "name": "Customer portal",        "stage": "apps",        "owner": "Olli Peltonen",  "team": "Residential sales",    "clearance": "confidential" },
+    { "id": "ANA-01",   "name": "Analytics platform",     "stage": "analytics",   "owner": "Antti Lindqvist","team": "Data platform",        "clearance": "confidential" }
+  ],
+
+  "flows": [
+    { "id": "supplier-invoices",     "name": "Supplier invoices",     "contract": "supplier-invoice v2",     "security_level": "confidential", "every_min": 60,
+      "path": { "source": "SRC-INV",  "integration": "INT-01", "dynamics": "D365-FIN", "apps": "APP-PRC",  "analytics": "ANA-01" } },
+    { "id": "project-budgets",       "name": "Project budgets",       "contract": "project-budget v1",       "security_level": "internal",     "every_min": 1440,
+      "path": { "source": "SRC-EST",  "integration": "INT-01", "dynamics": "D365-FIN", "apps": "APP-PRJ",  "analytics": "ANA-01" } },
+    { "id": "site-checkins",         "name": "Site worker check-ins", "contract": "worker-checkin v2",       "security_level": "secret",       "every_min": 15,
+      "path": { "source": "SRC-GATE", "integration": "INT-01", "dynamics": null,       "apps": "APP-SITE", "analytics": "ANA-01" } },
+    { "id": "moisture-readings",     "name": "Concrete moisture",     "contract": "moisture-reading v1",     "security_level": "internal",     "every_min": 30,
+      "path": { "source": "SRC-IOT",  "integration": "INT-02", "dynamics": null,       "apps": "APP-SITE", "analytics": "ANA-01" } },
+    { "id": "apartment-reservations","name": "Apartment reservations","contract": "unit-reservation v1",     "security_level": "secret",       "every_min": 30,
+      "path": { "source": "SRC-CRM",  "integration": "INT-01", "dynamics": "D365-FIN", "apps": "APP-CUS",  "analytics": "ANA-01" } }
+  ]
+}

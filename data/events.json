@@ -1,0 +1,29 @@
+[
+  { "system_id": "SRC-INV",  "system_name": "E-invoice operator",   "stage": "source",      "flow": "supplier-invoices", "source": null,       "status": "ok",     "date": "2026-11-12T09:55:00+02:00", "security_level": "confidential" },
+  { "system_id": "INT-01",   "system_name": "Integration hub",      "stage": "integration", "flow": "supplier-invoices", "source": "SRC-INV",  "status": "failed", "date": "2026-11-12T09:22:00+02:00", "security_level": "confidential", "message": "Mapping error: po_number missing in 112 of 2 950 rows" },
+  { "system_id": "D365-FIN", "system_name": "Dynamics 365 Finance", "stage": "dynamics",    "flow": "supplier-invoices", "source": "INT-01",   "status": "ok",     "date": "2026-11-12T08:25:00+02:00", "security_level": "confidential" },
+  { "system_id": "APP-PRC",  "system_name": "Procurement app",      "stage": "apps",        "flow": "supplier-invoices", "source": "D365-FIN", "status": "ok",     "date": "2026-11-12T08:26:00+02:00", "security_level": "confidential" },
+  { "system_id": "ANA-01",   "system_name": "Analytics platform",   "stage": "analytics",   "flow": "supplier-invoices", "source": "APP-PRC",  "status": "ok",     "date": "2026-11-12T08:30:00+02:00", "security_level": "confidential" },
+
+  { "system_id": "SRC-EST",  "system_name": "Estimating tool",      "stage": "source",      "flow": "project-budgets",   "source": null,       "status": "ok",     "date": "2026-11-12T05:00:00+02:00", "security_level": "internal" },
+  { "system_id": "INT-01",   "system_name": "Integration hub",      "stage": "integration", "flow": "project-budgets",   "source": "SRC-EST",  "status": "ok",     "date": "2026-11-12T05:02:00+02:00", "security_level": "internal" },
+  { "system_id": "D365-FIN", "system_name": "Dynamics 365 Finance", "stage": "dynamics",    "flow": "project-budgets",   "source": "INT-01",   "status": "ok",     "date": "2026-11-12T05:05:00+02:00", "security_level": "internal" },
+  { "system_id": "APP-PRJ",  "system_name": "Project app",          "stage": "apps",        "flow": "project-budgets",   "source": "D365-FIN", "status": "ok",     "date": "2026-11-12T05:10:00+02:00", "security_level": "internal" },
+  { "system_id": "ANA-01",   "system_name": "Analytics platform",   "stage": "analytics",   "flow": "project-budgets",   "source": "APP-PRJ",  "status": "ok",     "date": "2026-11-12T05:15:00+02:00", "security_level": "internal" },
+
+  { "system_id": "SRC-GATE", "system_name": "Site gate readers",    "stage": "source",      "flow": "site-checkins",     "source": null,       "status": "ok",     "date": "2026-11-12T07:40:00+02:00", "security_level": "secret" },
+  { "system_id": "INT-01",   "system_name": "Integration hub",      "stage": "integration", "flow": "site-checkins",     "source": "SRC-GATE", "status": "ok",     "date": "2026-11-12T07:41:00+02:00", "security_level": "confidential" },
+  { "system_id": "APP-SITE", "system_name": "Site app",             "stage": "apps",        "flow": "site-checkins",     "source": "INT-01",   "status": "ok",     "date": "2026-11-12T07:42:00+02:00", "security_level": "confidential" },
+  { "system_id": "ANA-01",   "system_name": "Analytics platform",   "stage": "analytics",   "flow": "site-checkins",     "source": "APP-SITE", "status": "ok",     "date": "2026-11-12T07:43:00+02:00", "security_level": "confidential" },
+
+  { "system_id": "SRC-IOT",  "system_name": "Moisture sensors",     "stage": "source",      "flow": "moisture-readings", "source": null,       "status": "ok",     "date": "2026-11-12T09:57:00+02:00", "security_level": "internal" },
+  { "system_id": "INT-02",   "system_name": "IoT hub",              "stage": "integration", "flow": "moisture-readings", "source": "SRC-IOT",  "status": "ok",     "date": "2026-11-12T09:57:00+02:00", "security_level": "internal" },
+  { "system_id": "APP-SITE", "system_name": "Site app",             "stage": "apps",        "flow": "moisture-readings", "source": "INT-02",   "status": "ok",     "date": "2026-11-12T09:58:00+02:00", "security_level": "internal" },
+  { "system_id": "ANA-01",   "system_name": "Analytics platform",   "stage": "analytics",   "flow": "moisture-readings", "source": "APP-SITE", "status": "ok",     "date": "2026-11-12T10:00:00+02:00", "security_level": "internal" },
+
+  { "system_id": "SRC-CRM",  "system_name": "Sales CRM",            "stage": "source",      "flow": "apartment-reservations", "source": null,       "status": "ok", "date": "2026-11-12T09:40:00+02:00", "security_level": "secret" },
+  { "system_id": "INT-01",   "system_name": "Integration hub",      "stage": "integration", "flow": "apartment-reservations", "source": "SRC-CRM",  "status": "ok", "date": "2026-11-12T09:41:00+02:00", "security_level": "confidential" },
+  { "system_id": "D365-FIN", "system_name": "Dynamics 365 Finance", "stage": "dynamics",    "flow": "apartment-reservations", "source": "INT-01",   "status": "ok", "date": "2026-11-12T09:42:00+02:00", "security_level": "confidential" },
+  { "system_id": "APP-CUS",  "system_name": "Customer portal",      "stage": "apps",        "flow": "apartment-reservations", "source": "D365-FIN", "status": "ok", "date": "2026-11-12T09:43:00+02:00", "security_level": "confidential" },
+  { "system_id": "ANA-01",   "system_name": "Analytics platform",   "stage": "analytics",   "flow": "apartment-reservations", "source": "APP-CUS",  "status": "ok", "date": "2026-11-12T09:45:00+02:00", "security_level": "confidential" }
+]
