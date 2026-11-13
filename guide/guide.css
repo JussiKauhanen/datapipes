@@ -229,3 +229,18 @@ td:first-child { white-space: nowrap; }
 .end p { margin: 4px 0 0; color: var(--text-2); }
 .foot { border-top: 1px solid var(--border); padding: 20px 28px 36px; font-size: 13px; color: var(--text-3); text-align: center; }
 @media (max-width: 600px) { .appbar { padding: 0 12px; } .appbar .hide-sm { display: none; } }
+
+/* intake diagram */
+.intake { display: grid; grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; margin: 14px 0 18px; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--sunken); }
+.intake .ins, .intake .outs { display: flex; flex-direction: column; gap: 6px; }
+.intake .ins span, .intake .outs span { padding: 7px 10px; border-radius: 6px; background: var(--card); box-shadow: var(--shadow); font-size: 13.5px; }
+.intake .outs span { border-left: 3px solid var(--ok); }
+.intake .core { padding: 18px 16px; border-radius: 10px; background: var(--blue); color: #fff; text-align: center; }
+.intake .core b { display: block; font-size: 17px; margin-bottom: 4px; }
+.intake .core span { font-size: 13px; opacity: .9; }
+:root[data-theme="dark"] .intake .core { color: #1f1f21; }
+.intake .arrow { color: var(--text-3); font-size: 20px; }
+@media (max-width: 760px) { .intake { grid-template-columns: 1fr; } .intake .arrow { transform: rotate(90deg); justify-self: center; } }
+.lv:nth-child(5) .step { background: #227d9b; }
+small { font-size: 12.5px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .intake .core { color: #1f1f21; } }

@@ -252,7 +252,7 @@
 
       <section class="sect">
         <h2>The checkpoint event</h2>
-        <p class="sub">Each system sends this when a message passes. <code>run_id</code> ties the checkpoints of one message together; <code>source</code> links them into a path. The owner is looked up by <code>system_id</code>.</p>
+        <p class="sub">Each system sends this when a message passes. <code>run_id</code> ties the checkpoints of one message together; <code>source</code> links them into a path. The owner is looked up by <code>system_id</code>. For real, it can arrive many ways (API, webhook, stream, file) and is stored as OpenLineage, with contracts in ODCS: <a href="../guide/#standards">see the guide</a>.</p>
         <div class="cols2">
           <pre class="code">${sample ? jsonHtml(sample, ['run_id', 'source', 'status']) : ''}</pre>
           <div class="box"><div class="bh">When does a checkpoint change colour?</div>

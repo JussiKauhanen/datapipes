@@ -31,7 +31,8 @@
     <b>On this page</b>
     <a href="#why">Why contracts</a>
     <a href="#model">The data model</a>
-    <a href="#send">What systems send</a>
+    <a href="#standards">Open standards</a>
+    <a href="#send">Ways in</a>
     <a href="#manage">How it is managed</a>
     <a href="#expect">When to turn yellow</a>
     <a href="#keep">What we keep</a>
@@ -42,10 +43,10 @@
   <main>
     <p class="eyebrow">From demo to real</p>
     <h1>How to get from this demo to the real thing</h1>
-    <p class="lede">The demo runs on four small things: a register of systems and owners, a contract per data flow, one event each system sends when a message passes, and expectations for when it should arrive. Here is what each one is, how to start simple, and what we need to decide.</p>
+    <p class="lede">The demo runs on four small things: a register of systems and owners, a contract per data flow, one event each system sends when a message passes, and expectations for when it should arrive. Here is what each one is, how to start simple, which open standards to build on, and what we need to decide.</p>
     <div class="steps4">
       <a href="#model"><span class="n">01</span><b>Model</b><span>Systems, contracts, checkpoints. Start with a spreadsheet.</span></a>
-      <a href="#send"><span class="n">02</span><b>Signal</b><span>One small event per checkpoint. No data values.</span></a>
+      <a href="#send"><span class="n">02</span><b>Signal</b><span>One small event per checkpoint, many ways to send it. No data values.</span></a>
       <a href="#manage"><span class="n">03</span><b>Manage</b><span>Contracts as files in git, owned and reviewed.</span></a>
       <a href="#expect"><span class="n">04</span><b>Expect</b><span>Declared first, learned later, owner decides.</span></a>
     </div>
@@ -70,7 +71,7 @@
     <section id="model">
       <span class="secnum">02 · Model</span>
       <h2>The data model, from simple to hard</h2>
-      <p class="sub">Four levels. Each one is useful on its own, and each one builds on the previous. Most of the value arrives at level 3; level 4 is where it gets precise.</p>
+      <p class="sub">Five levels. Each one is useful on its own, and each one builds on the previous. Most of the value arrives at level 3; level 4 is where it gets precise; level 5 connects it to what the business calls things.</p>
 
       <div class="erd" aria-label="Entity diagram">
         <svg viewBox="0 0 900 250" role="img" aria-label="System has many checkpoints; contract has many checkpoints; contract has a producer and readers that are systems; each checkpoint belongs to a run">
@@ -109,7 +110,7 @@
             <span class="meta"><span class="pill green">Weeks</span><span class="pill">One owner per contract</span>
               <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
           <div class="lb">
-            <p>The route through the systems does not have to be written down: the events will show it. Listing readers is what makes impact analysis possible later.</p>
+            <p>The route through the systems does not have to be written down: the events will show it. Listing readers is what makes impact analysis possible later. The ODCS tab shows the same contract in the open standard.</p>
             <div data-snip="contract"></div>
           </div>
         </div>
@@ -119,7 +120,7 @@
             <span class="meta"><span class="pill amber">Pilot first</span><span class="pill">Most of the value</span>
               <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
           <div class="lb">
-            <p><code>run_id</code> ties one message's checkpoints together; <code>source</code> links them into a path. The owner is not in the event, it comes from the register. <code>records</code> and <code>profile</code> describe the data without containing any of it.</p>
+            <p><code>run_id</code> ties one message's checkpoints together; <code>source</code> links them into a path. The owner is not in the event, it comes from the register. <code>records</code> and <code>profile</code> describe the data without containing any of it. The OpenLineage tab shows how the same checkpoint is stored.</p>
             <div data-snip="event" data-start="example"></div>
           </div>
         </div>
@@ -133,14 +134,41 @@
             <div data-snip="shape"></div>
           </div>
         </div>
+        <div class="lv">
+          <button type="button" class="lh" aria-expanded="false"><span class="step">5</span>
+            <span class="tx"><b>Meaning: metrics and how datasets relate</b><span>What the business calls things, tied back to the contracts that deliver the data.</span></span>
+            <span class="meta"><span class="pill">Later</span><span class="pill">Analytics end</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
+          <div class="lb">
+            <p>Contracts say what a feed delivers. A semantic model says what it means: <i>committed cost</i> is approved orders plus unmatched invoices, and invoices join orders on <code>po_number</code>. Linking the two lets impact analysis reach the business: removing <code>po_number</code> breaks the procurement app, the cost forecast <b>and the committed-cost metric in three reports</b>.</p>
+            <div data-snip="meaning" data-start="example"></div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- ===================================================== -->
+    <section id="standards">
+      <span class="secnum">03 · Standards</span>
+      <h2>Built on open standards, not our own formats</h2>
+      <p class="sub">The demo uses its own small formats so it is easy to read. For real, each piece has an open standard. Using them costs little and means catalogues, lineage tools and BI tools can read what we produce.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Our piece</th><th>Standard</th><th>Status</th><th>How we would use it</th></tr></thead>
+        <tbody>
+          <tr><td>Contract file<br><small style="color:var(--text-3)">levels 2 and 4</small></td><td><b>Open Data Contract Standard (ODCS)</b><br><small style="color:var(--text-3)">Bitol, LF AI &amp; Data · Apache 2.0</small></td><td><span class="pill green">v3.x, stable</span></td><td>Write every contract in it from day one. Owner, steward, SLA, field classification and quality rules all have a place. Linting and tests come free with the open-source Data Contract CLI.</td></tr>
+          <tr><td>Checkpoint event<br><small style="color:var(--text-3)">level 3</small></td><td><b>OpenLineage</b><br><small style="color:var(--text-3)">LF AI &amp; Data graduate project</small></td><td><span class="pill green">Widely supported</span></td><td>The format we store. Systems keep sending the small event; the intake translates it. Capable systems can send OpenLineage directly. Lineage tools and catalogues can read the result.</td></tr>
+          <tr><td>Meaning<br><small style="color:var(--text-3)">level 5</small></td><td><b>Apache Ossie</b><br><small style="color:var(--text-3)">formerly Open Semantic Interchange</small></td><td><span class="pill amber">Incubating, v0.2 draft</span></td><td>Watch and pilot at the analytics end, for example Finance in Power BI once the converter Microsoft is building is out. Share field names and owners with the contracts from the start.</td></tr>
+          <tr><td>Webhook envelope<br><small style="color:var(--text-3)">ways in</small></td><td><b>CloudEvents</b><br><small style="color:var(--text-3)">CNCF</small></td><td><span class="pill green">Stable</span></td><td>Optional. If a source can choose its webhook format, ask for CloudEvents; if not, map whatever it sends.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout"><b>Does this change the design?</b> Not at the high level: still a register, contracts, checkpoints and expectations. It changes the formats at rest, and it makes one thing explicit: an intake that accepts many ways in and turns them all into the same checkpoint.</div>
+    </section>
+
+    <!-- ===================================================== -->
     <section id="send">
-      <span class="secnum">03 · Signal</span>
-      <h2>What systems should send</h2>
-      <p class="sub">One small event when a message passes, and one when it fails. Never the data itself.</p>
+      <span class="secnum">04 · Ways in</span>
+      <h2>What systems send, and the ways in</h2>
+      <p class="sub">One small event when a message passes, and one when it fails. Never the data itself. How it arrives is up to the system.</p>
       <div class="tw"><table>
         <thead><tr><th>Field</th><th>Required</th><th>Why</th></tr></thead>
         <tbody>
@@ -153,37 +181,50 @@
         </tbody>
       </table></div>
 
-      <h3>Who sends it</h3>
-      <div class="ways">
-        <div class="way"><div class="wt"><span class="pill green">Start here</span><b>The integration platform, on behalf of others</b></div>
-          <p>Most flows already pass through the hub. One step in each integration emits the checkpoint before and after it hands data on. In the demo the hub alone covers 18 of 30 contracts.</p>
-          <div class="when">Logic App / Function step, or an API gateway policy</div></div>
-        <div class="way"><div class="wt"><span class="pill">Best</span><b>The system itself</b></div>
-          <p>The system posts the event when it finishes a run. Most precise, but needs a change in every system, so do it where it is cheap or the flow is critical.</p>
-          <div class="when">HTTP endpoint or event stream</div></div>
-        <div class="way"><div class="wt"><span class="pill">Fallback</span><b>The platform watches</b></div>
-          <p>For systems that cannot send anything: notice the file arriving, the table changing, or the Dynamics 365 business event, and write the checkpoint for them.</p>
-          <div class="when">File drop, database watermark, D365 business events</div></div>
-        <div class="way"><div class="wt"><span class="pill">Honest grey</span><b>Nobody can tell</b></div>
-          <p>Mark the checkpoint as not observed. A grey box that says "we don't know" is better than a green one that guesses.</p>
-          <div class="when">Shown as unobserved, never as passing</div></div>
+      <h3>Many ways in, one model inside</h3>
+      <p style="color:var(--text-2);font-size:15px">Systems differ a lot in what they can do. The intake meets each one where it is, checks it, and turns everything into the same checkpoint. Nothing downstream knows or cares how a checkpoint arrived.</p>
+      <div class="intake" role="img" aria-label="Many ways in on the left go into the intake, which produces one checkpoint format for the register, the board and alerts">
+        <div class="ins">
+          <span>API call</span><span>Webhook</span><span>Event stream</span><span>Integration step</span><span>File or table watch</span><span>Scheduled pull</span>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="core"><b>Intake</b><span>authenticate · map · deduplicate · translate to OpenLineage</span></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="outs"><span>Checkpoint store</span><span>Board and status</span><span>Alerts to stewards</span></div>
       </div>
+      <div class="ways">
+        <div class="way"><div class="wt"><span class="pill green">Start here</span><b>Integration step</b></div>
+          <p>Most flows already pass through the integration platform. One step in each integration emits the checkpoint before and after it hands data on. In the demo the hub alone covers 18 of 30 contracts.</p></div>
+        <div class="way"><div class="wt"><span class="pill">Precise</span><b>API call from the system</b></div>
+          <p>The system posts the event when it finishes a run. Best quality, but needs a change in each system; do it where it is cheap or the flow is critical.</p></div>
+        <div class="way"><div class="wt"><span class="pill green">For less capable systems</span><b>Webhook</b></div>
+          <p>Many SaaS tools and partner systems can't call our API, but can call a URL when something happens. Each source gets its own address and secret; we accept its own payload and map it. No change on their side.</p></div>
+        <div class="way"><div class="wt"><span class="pill">High volume</span><b>Event stream or queue</b></div>
+          <p>Systems that already publish events put checkpoints on a stream the intake reads. Good for sensors and anything that runs every few minutes.</p></div>
+        <div class="way"><div class="wt"><span class="pill">No change needed</span><b>Watch files and tables</b></div>
+          <p>For systems that can't send anything: notice the file landing, the table changing, or the Dynamics 365 business event, and write the checkpoint for them.</p></div>
+        <div class="way"><div class="wt"><span class="pill">Fallback</span><b>Scheduled pull</b></div>
+          <p>Ask the system's own status API every few minutes. Coarser timing, but better than nothing. If even that fails, the checkpoint shows as not observed, never as passing.</p></div>
+      </div>
+      <h3>Example: a source that can only send a webhook</h3>
+      <div data-snip="webhook"></div>
+      <p style="color:var(--text-2);font-size:15px;margin-top:14px">All of this runs well on Azure with a handful of standard services (an API front door, an event broker, small functions for the mappings), but nothing in the design depends on a particular product.</p>
       <div class="callout"><b>Rule of thumb:</b> if a system can write a log line, it can send a checkpoint. The event is small enough to send from anywhere, and it carries counts, never values.</div>
     </section>
 
     <!-- ===================================================== -->
     <section id="manage">
-      <span class="secnum">04 · Manage</span>
+      <span class="secnum">05 · Manage</span>
       <h2>How contracts are managed</h2>
-      <p class="sub">Contracts live as files in git, one per contract. Changing one is a pull request. The catalogue and the board are built from the files.</p>
+      <p class="sub">Contracts live as ODCS files in git, one per contract. Changing one is a pull request. The catalogue and the board are built from the files.</p>
       <div class="flow">
         <div><b>Propose</b>Steward edits the file and opens a pull request.</div>
-        <div><b>Check</b>Automated: file is valid, owners exist, levels are known.</div>
+        <div><b>Check</b>Automated: valid ODCS, owners exist, levels are known.</div>
         <div><b>Impact</b>Breaking changes list the readers who use the field and notify them.</div>
         <div><b>Approve</b>Business owner approves. Breaking changes also need the readers.</div>
         <div><b>Publish</b>Merged file goes live in the catalogue and on the board.</div>
       </div>
-      <div data-snip="yaml" data-start="example"></div>
+      <div data-snip="yaml"></div>
 
       <h3>Who does what</h3>
       <div class="tw"><table>
@@ -200,7 +241,7 @@
 
     <!-- ===================================================== -->
     <section id="expect">
-      <span class="secnum">05 · Expect</span>
+      <span class="secnum">06 · Expect</span>
       <h2>When should a checkpoint turn yellow?</h2>
       <p class="sub">The colours are only as good as the expectations behind them. There are three ways to set them.</p>
       <div class="opts">
@@ -229,7 +270,7 @@
 
     <!-- ===================================================== -->
     <section id="keep">
-      <span class="secnum">06 · Keep</span>
+      <span class="secnum">07 · Keep</span>
       <h2>What we keep, and for how long</h2>
       <p class="sub">Checkpoints are small but many: 30 contracts at five hops each already produce thousands a day. Keep detail short, keep summaries long. The values below are starting points to agree on.</p>
       <div class="tw"><table>
@@ -247,7 +288,7 @@
 
     <!-- ===================================================== -->
     <section id="road">
-      <span class="secnum">07 · Getting there</span>
+      <span class="secnum">08 · Getting there</span>
       <h2>A path that starts small</h2>
       <p class="sub">Each step is useful on its own, and each one can stop if it doesn't pay off.</p>
       <ol class="road">
@@ -261,9 +302,11 @@
 
     <!-- ===================================================== -->
     <section id="decide">
-      <span class="secnum">08 · Decide</span>
+      <span class="secnum">09 · Decide</span>
       <h2>Decisions needed from architecture</h2>
       <ul class="decide">
+        <li><b>Adopt ODCS and OpenLineage</b>Contracts in ODCS from day one; checkpoints stored as OpenLineage. Ossie watched for the semantic layer.</li>
+        <li><b>Which ways in first</b>Integration steps and webhooks first; then direct API calls and file watching where they are cheap.</li>
         <li><b>Where the register lives</b>Our own small service, or a catalogue we already have (for example Microsoft Purview), with the board on top.</li>
         <li><b>Event transport</b>An HTTP endpoint, an event stream, or both. Integration steps and systems need one stable address.</li>
         <li><b>run_id standard</b>Who creates it, its format, and how it is passed on through files, APIs and batches.</li>
