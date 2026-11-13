@@ -86,3 +86,10 @@ body { overflow: auto; }
 .impact li a:hover { text-decoration: underline; }
 @media (max-width: 860px) { .appbar .clock, .appbar .seg { display: none; } .page { padding: 12px 16px 40px; } .search { width: 100%; } }
 .mx tr.dimrow td.rowh { opacity: .35; }
+
+/* call to action: the guide */
+.btn.cta { border-color: var(--brand); color: var(--brand); font-weight: 600; }
+.btn.cta:hover { background: color-mix(in srgb, var(--brand) 10%, transparent); }
+.btn.cta .s { display: none; }
+@media (max-width: 860px) { .btn.cta .l { display: none; } .btn.cta .s { display: inline; } }
+@media (max-width: 600px) { .appbar .vtag { display: none; } }

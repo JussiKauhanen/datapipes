@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to get here · Routa data contracts</title>
+<meta name="description" content="From demo to real: the data model, what systems send, how contracts are managed, and how expectations are set. For data architects.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="guide.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="appbar">
+  <a class="logo" href="../v3/" aria-label="Routa data, back to the demo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
+    <span>Routa Data</span>
+  </a>
+  <span class="tag">Guide</span>
+  <span class="spacer"></span>
+  <a class="btn hide-sm" href="../v-beta/">Landscape</a>
+  <a class="btn primary" href="../v3/">Open the demo</a>
+  <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<div class="wrap">
+  <nav class="toc" aria-label="On this page">
+    <b>On this page</b>
+    <a href="#why">Why contracts</a>
+    <a href="#model">The data model</a>
+    <a href="#send">What systems send</a>
+    <a href="#manage">How it is managed</a>
+    <a href="#expect">When to turn yellow</a>
+    <a href="#keep">What we keep</a>
+    <a href="#road">Getting there</a>
+    <a href="#decide">Decisions needed</a>
+  </nav>
+
+  <main>
+    <p class="eyebrow">From demo to real</p>
+    <h1>How to get from this demo to the real thing</h1>
+    <p class="lede">The demo runs on four small things: a register of systems and owners, a contract per data flow, one event each system sends when a message passes, and expectations for when it should arrive. Here is what each one is, how to start simple, and what we need to decide.</p>
+    <div class="steps4">
+      <a href="#model"><span class="n">01</span><b>Model</b><span>Systems, contracts, checkpoints. Start with a spreadsheet.</span></a>
+      <a href="#send"><span class="n">02</span><b>Signal</b><span>One small event per checkpoint. No data values.</span></a>
+      <a href="#manage"><span class="n">03</span><b>Manage</b><span>Contracts as files in git, owned and reviewed.</span></a>
+      <a href="#expect"><span class="n">04</span><b>Expect</b><span>Declared first, learned later, owner decides.</span></a>
+    </div>
+
+    <!-- ===================================================== -->
+    <section id="why">
+      <span class="secnum">01 · Why</span>
+      <h2>Without contracts, problems are found by the people who use the data</h2>
+      <p class="sub">Most integrations work. The trouble is what happens when one doesn't: nobody is told, nobody is sure who owns it, and nobody knows what else it breaks.</p>
+      <div class="vs">
+        <div class="row hd"><div>Without a contract</div><div>With a contract and checkpoints</div></div>
+        <div class="row"><div><span class="topic">A field disappears upstream</span>Reports quietly go wrong. Someone notices at month-end.</div><div><span class="topic">&nbsp;</span>The change is checked against registered readers before it ships. Breaking changes need a new major version.</div></div>
+        <div class="row"><div><span class="topic">A feed stops at 03:00</span>Found at 09:00, in a meeting, by the person who needed the numbers.</div><div><span class="topic">&nbsp;</span>The checkpoint turns yellow minutes after it was due. The steward is told before anyone opens a report.</div></div>
+        <div class="row"><div><span class="topic">"Who owns this?"</span>The ticket moves between three teams.</div><div><span class="topic">&nbsp;</span>Every system and every contract has a named business owner and steward.</div></div>
+        <div class="row"><div><span class="topic">Personal data ends up in analytics</span>Found in an audit.</div><div><span class="topic">&nbsp;</span>Data above a system's clearance is held back at the door, and the sender is named.</div></div>
+        <div class="row"><div><span class="topic">"What does this outage break?"</span>Guessed.</div><div><span class="topic">&nbsp;</span>Read down one column: 18 contracts, 11 systems after it.</div></div>
+      </div>
+      <p class="quote">A data contract is a promise from the team that produces the data: this is what it looks like, how secret it is, when it arrives, and who to call. The checkpoints show whether the promise is being kept.</p>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="model">
+      <span class="secnum">02 · Model</span>
+      <h2>The data model, from simple to hard</h2>
+      <p class="sub">Four levels. Each one is useful on its own, and each one builds on the previous. Most of the value arrives at level 3; level 4 is where it gets precise.</p>
+
+      <div class="erd" aria-label="Entity diagram">
+        <svg viewBox="0 0 900 250" role="img" aria-label="System has many checkpoints; contract has many checkpoints; contract has a producer and readers that are systems; each checkpoint belongs to a run">
+          <g class="ent"><rect x="20" y="40" width="220" height="150" rx="8"/><rect class="hd" x="20" y="40" width="220" height="32" rx="8"/>
+            <text class="t" x="34" y="61">System</text>
+            <text class="f" x="34" y="94">id, name, stage</text><text class="f" x="34" y="116">owner, steward</text><text class="f" x="34" y="138">clearance</text>
+            <text class="lab" x="34" y="176">level 1</text></g>
+          <g class="ent"><rect x="660" y="40" width="220" height="150" rx="8"/><rect class="hd" x="660" y="40" width="220" height="32" rx="8"/>
+            <text class="t" x="674" y="61">Contract</text>
+            <text class="f" x="674" y="94">id, version, owner</text><text class="f" x="674" y="116">producer, schedule</text><text class="f" x="674" y="138">fields, readers, expect.</text>
+            <text class="lab" x="674" y="176">levels 2 and 4</text></g>
+          <g class="ent"><rect x="340" y="40" width="220" height="172" rx="8"/><rect class="hd" x="340" y="40" width="220" height="32" rx="8"/>
+            <text class="t" x="354" y="61">Checkpoint event</text>
+            <text class="f" x="354" y="94">system_id → System</text><text class="f" x="354" y="116">flow → Contract</text><text class="f" x="354" y="138">run_id, source</text><text class="f" x="354" y="160">status, date, level</text>
+            <text class="lab" x="354" y="198">level 3</text></g>
+          <path d="M240 110 H340"/><text class="lab" x="252" y="102">1 … many</text>
+          <path d="M560 110 H660"/><text class="lab" x="582" y="102">many … 1</text>
+          <path d="M130 190 V232 H770 V190" stroke-dasharray="4 4"/><text class="lab" x="330" y="226">a contract's producer and readers are systems</text>
+        </svg>
+      </div>
+
+      <div class="ladder" style="margin-top:18px">
+        <div class="lv open">
+          <button type="button" class="lh" aria-expanded="true"><span class="step">1</span>
+            <span class="tx"><b>Register: systems and owners</b><span>Every system once, with a stage, an owner, a steward and the highest security level it may hold.</span></span>
+            <span class="meta"><span class="pill green">Days</span><span class="pill">Spreadsheet is fine</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
+          <div class="lb">
+            <p>Answers <b>who to call</b> on its own, before any event exists. Stages are a fixed list (source, integration, Dynamics 365, apps, analytics), so the board never grows sideways. The security levels should be the ones we already use.</p>
+            <div data-snip="system"></div>
+          </div>
+        </div>
+        <div class="lv">
+          <button type="button" class="lh" aria-expanded="false"><span class="step">2</span>
+            <span class="tx"><b>Contracts: what flows, from where, how often</b><span>One per data flow: producer, readers, schedule, security level, owner. No field lists yet.</span></span>
+            <span class="meta"><span class="pill green">Weeks</span><span class="pill">One owner per contract</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
+          <div class="lb">
+            <p>The route through the systems does not have to be written down: the events will show it. Listing readers is what makes impact analysis possible later.</p>
+            <div data-snip="contract"></div>
+          </div>
+        </div>
+        <div class="lv">
+          <button type="button" class="lh" aria-expanded="false"><span class="step">3</span>
+            <span class="tx"><b>Checkpoints: one event per system per message</b><span>The thing that turns the boxes green, yellow and red. Same shape everywhere.</span></span>
+            <span class="meta"><span class="pill amber">Pilot first</span><span class="pill">Most of the value</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
+          <div class="lb">
+            <p><code>run_id</code> ties one message's checkpoints together; <code>source</code> links them into a path. The owner is not in the event, it comes from the register. <code>records</code> and <code>profile</code> describe the data without containing any of it.</p>
+            <div data-snip="event" data-start="example"></div>
+          </div>
+        </div>
+        <div class="lv">
+          <button type="button" class="lh" aria-expanded="false"><span class="step">4</span>
+            <span class="tx"><b>Shape and expectations: fields, readers, arrival</b><span>Field names, types and levels; which reader uses which field; when the data should arrive.</span></span>
+            <span class="meta"><span class="pill">Per contract, over time</span>
+              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
+          <div class="lb">
+            <p>Field-level readers are what let us say "removing <code>po_number</code> breaks the cost forecast and the procurement app" before anyone ships it. Start with the contracts that hurt most when they break.</p>
+            <div data-snip="shape"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="send">
+      <span class="secnum">03 · Signal</span>
+      <h2>What systems should send</h2>
+      <p class="sub">One small event when a message passes, and one when it fails. Never the data itself.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Field</th><th>Required</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><code>system_id</code>, <code>flow</code></td><td>Yes</td><td>Which checkpoint of which contract. Owner and clearance are looked up from these.</td></tr>
+          <tr><td><code>run_id</code></td><td>Yes</td><td>Ties one message together across systems. Created at the source, passed along. If a system can't pass it, the batch or file name works.</td></tr>
+          <tr><td><code>source</code></td><td>Yes</td><td>Where it came from. The path is built from this, so nobody has to maintain it.</td></tr>
+          <tr><td><code>status</code>, <code>date</code></td><td>Yes</td><td><code>ok</code> or <code>failed</code>, with an ISO time and offset. The platform works out late, waiting and blocked itself.</td></tr>
+          <tr><td><code>security_level</code></td><td>Yes</td><td>How secret the data is as it leaves. Lets the next system refuse what it is not cleared for.</td></tr>
+          <tr><td><code>records</code>, <code>profile</code>, <code>message</code></td><td>No</td><td>Counts and one line of text. Turns "it failed" into "112 rows had no purchase order".</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>Who sends it</h3>
+      <div class="ways">
+        <div class="way"><div class="wt"><span class="pill green">Start here</span><b>The integration platform, on behalf of others</b></div>
+          <p>Most flows already pass through the hub. One step in each integration emits the checkpoint before and after it hands data on. In the demo the hub alone covers 18 of 30 contracts.</p>
+          <div class="when">Logic App / Function step, or an API gateway policy</div></div>
+        <div class="way"><div class="wt"><span class="pill">Best</span><b>The system itself</b></div>
+          <p>The system posts the event when it finishes a run. Most precise, but needs a change in every system, so do it where it is cheap or the flow is critical.</p>
+          <div class="when">HTTP endpoint or event stream</div></div>
+        <div class="way"><div class="wt"><span class="pill">Fallback</span><b>The platform watches</b></div>
+          <p>For systems that cannot send anything: notice the file arriving, the table changing, or the Dynamics 365 business event, and write the checkpoint for them.</p>
+          <div class="when">File drop, database watermark, D365 business events</div></div>
+        <div class="way"><div class="wt"><span class="pill">Honest grey</span><b>Nobody can tell</b></div>
+          <p>Mark the checkpoint as not observed. A grey box that says "we don't know" is better than a green one that guesses.</p>
+          <div class="when">Shown as unobserved, never as passing</div></div>
+      </div>
+      <div class="callout"><b>Rule of thumb:</b> if a system can write a log line, it can send a checkpoint. The event is small enough to send from anywhere, and it carries counts, never values.</div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="manage">
+      <span class="secnum">04 · Manage</span>
+      <h2>How contracts are managed</h2>
+      <p class="sub">Contracts live as files in git, one per contract. Changing one is a pull request. The catalogue and the board are built from the files.</p>
+      <div class="flow">
+        <div><b>Propose</b>Steward edits the file and opens a pull request.</div>
+        <div><b>Check</b>Automated: file is valid, owners exist, levels are known.</div>
+        <div><b>Impact</b>Breaking changes list the readers who use the field and notify them.</div>
+        <div><b>Approve</b>Business owner approves. Breaking changes also need the readers.</div>
+        <div><b>Publish</b>Merged file goes live in the catalogue and on the board.</div>
+      </div>
+      <div data-snip="yaml" data-start="example"></div>
+
+      <h3>Who does what</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Role</th><th>Answers for</th><th>Typical person</th></tr></thead>
+        <tbody>
+          <tr><td>Business owner</td><td>What the data means, who may use it, approving changes.</td><td>Head of the function that produces the data</td></tr>
+          <tr><td>Steward</td><td>The feed working, the contract file being right, announcing changes. Gets the alerts.</td><td>System or integration specialist</td></tr>
+          <tr><td>Reader</td><td>Registering which fields it uses. Saying yes or no to breaking changes.</td><td>Owner of the report, app or model</td></tr>
+          <tr><td>Platform team</td><td>The event endpoint, the register, the board, retention.</td><td>Data platform</td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin-top:14px;color:var(--text-2);font-size:15px">Versioning follows the usual rule: major for anything that breaks a reader (remove, rename, change type), minor for anything safe (add an optional field, a new value). The old major stays published until its last reader has moved, with a sunset date.</p>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="expect">
+      <span class="secnum">05 · Expect</span>
+      <h2>When should a checkpoint turn yellow?</h2>
+      <p class="sub">The colours are only as good as the expectations behind them. There are three ways to set them.</p>
+      <div class="opts">
+        <div class="opt"><h4>Declared</h4><p>The owner writes the expected times into the contract: runs every 60 min, each hop within 5 min.</p>
+          <ul><li class="p">Simple, explicit, easy to explain</li><li class="p">Works from day one</li><li class="m">Guesses are often wrong</li><li class="m">Goes stale as volumes change</li></ul></div>
+        <div class="opt"><h4>Learned</h4><p>The platform keeps per-checkpoint timing history and flags anything outside the normal range.</p>
+          <ul><li class="p">Fits how things really run</li><li class="p">Spots slow drift nobody declared</li><li class="m">Needs weeks of history</li><li class="m">"Normal" can be normally bad</li></ul></div>
+        <div class="opt rec"><h4>Both: declared limits, learned normal</h4><p>Start with declared values. After enough runs, the platform learns the normal range and suggests changes; the owner accepts or rejects.</p>
+          <ul><li class="p">Works day one, gets sharper</li><li class="p">The owner stays in charge</li><li class="p">Declared value caps the learned one</li><li class="m">A little more to build</li></ul></div>
+      </div>
+
+      <h3>How the recommended option decides</h3>
+      <div class="lights">
+        <div><b><i style="background:var(--ok)"></i>Green</b>Arrived within the normal range for this checkpoint and time slot.</div>
+        <div><b><i style="background:var(--late)"></i>Yellow</b>Later than expected: the declared SLA, or the learned 95th percentile once the owner has accepted it. Worth a look, no alert.</div>
+        <div><b><i style="background:var(--bad)"></i>Red</b>Past 3× the expected time, an error, or data above the clearance. The steward is alerted.</div>
+      </div>
+      <ul style="color:var(--text-2);font-size:15px;margin-top:16px;max-width:72ch">
+        <li><b>Learn per time slot</b>, not one average: weekday mornings, nights, month-end close and the Finnish holiday calendar each behave differently.</li>
+        <li><b>Wait for about 20 runs</b> before trusting a learned value. Until then, the declared value is used on its own.</li>
+        <li><b>Never learn from bad days.</b> Runs that failed or were red are left out, so an outage does not become the new normal.</li>
+        <li><b>Suggestions go to the owner</b>, with the evidence: "p95 has been 3.9 min for 6 weeks; suggest 4 min instead of 5."</li>
+      </ul>
+      <div data-snip="learned" data-start="example"></div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="keep">
+      <span class="secnum">06 · Keep</span>
+      <h2>What we keep, and for how long</h2>
+      <p class="sub">Checkpoints are small but many: 30 contracts at five hops each already produce thousands a day. Keep detail short, keep summaries long. The values below are starting points to agree on.</p>
+      <div class="tw"><table>
+        <thead><tr><th>What</th><th>Keep</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Raw checkpoint events</td><td>30–90 days</td><td>Investigating a specific run. Older detail is rarely looked at.</td></tr>
+          <tr><td>One summary row per run</td><td>13 months</td><td>"When did this start?" and year-on-year comparison, such as last month-end.</td></tr>
+          <tr><td>Hourly counts and percentiles per checkpoint</td><td>25 months</td><td>What the learned expectations are built from; covers two of every season.</td></tr>
+          <tr><td>Learned baselines and accepted SLA changes</td><td>Current + change history</td><td>Explaining why a box turned yellow on a given day.</td></tr>
+          <tr><td>Security blocks</td><td>As our audit policy says</td><td>Evidence that secret data was held back.</td></tr>
+          <tr><td>Data values</td><td>Never</td><td>The platform does not receive them in the first place.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="road">
+      <span class="secnum">07 · Getting there</span>
+      <h2>A path that starts small</h2>
+      <p class="sub">Each step is useful on its own, and each one can stop if it doesn't pay off.</p>
+      <ol class="road">
+        <li data-n="0" class="now"><b>Sandbox <span class="pill green">Now</span></b><span>This demo, invented data. Agree on the model and the event.</span></li>
+        <li data-n="1"><b>Register</b><span>List the real systems, owners and stewards. Level 1 only; a spreadsheet is enough.</span></li>
+        <li data-n="2"><b>Pilot three contracts</b><span>Pick three that hurt when they break, for example supplier invoices, worker check-ins and project budgets. The integration platform sends their checkpoints. Expectations declared.</span></li>
+        <li data-n="3"><b>Everything through the hub</b><span>Every integration step emits checkpoints. Contracts move to git; readers register their fields.</span></li>
+        <li data-n="4"><b>Learn and tighten</b><span>Learned expectations switched on; owners review suggestions; the systems that matter most send their own events.</span></li>
+      </ol>
+    </section>
+
+    <!-- ===================================================== -->
+    <section id="decide">
+      <span class="secnum">08 · Decide</span>
+      <h2>Decisions needed from architecture</h2>
+      <ul class="decide">
+        <li><b>Where the register lives</b>Our own small service, or a catalogue we already have (for example Microsoft Purview), with the board on top.</li>
+        <li><b>Event transport</b>An HTTP endpoint, an event stream, or both. Integration steps and systems need one stable address.</li>
+        <li><b>run_id standard</b>Who creates it, its format, and how it is passed on through files, APIs and batches.</li>
+        <li><b>Security levels</b>Map the four levels used here to our existing classification, and decide where pseudonymisation happens.</li>
+        <li><b>Who owns the platform</b>The team that runs the endpoint, the board and retention, and answers when the board itself is wrong.</li>
+        <li><b>Retention and calendars</b>Agree the periods above, and which calendars (business days, month-end, holidays) expectations should know about.</li>
+      </ul>
+    </section>
+
+    <div class="end">
+      <div><h2>See it working</h2><p>The demo uses exactly this model: register, contracts, checkpoint events and declared expectations.</p></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="../v-beta/">Landscape</a><a class="btn primary" href="../v3/">Open the demo</a></div>
+    </div>
+  </main>
+</div>
+<footer class="foot">Routa Rakennus Oyj and every system, person and number on these pages are invented.</footer>
+<script src="guide.js"></script>
+</body>
+</html>

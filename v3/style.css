@@ -272,3 +272,10 @@ pre.code .hl { background: var(--t-late-bg); }
 #sankey.hl .band:not(.lit) { opacity: .06; }
 #sankey.hl .band.lit.t-ok { opacity: .7; }
 #sankey.hl .snode:not(.lit) { opacity: .3; }
+
+/* call to action: the guide */
+.btn.cta { border-color: var(--brand); color: var(--brand); font-weight: 600; }
+.btn.cta:hover { background: color-mix(in srgb, var(--brand) 10%, transparent); }
+.btn.cta .s { display: none; }
+@media (max-width: 860px) { .btn.cta .l { display: none; } .btn.cta .s { display: inline; } }
+@media (max-width: 600px) { .appbar .vtag { display: none; } }

@@ -1,51 +1,33 @@
-# datapipes · v2 (at scale)
+# datapipes
+
+Sandbox prototype of a lightweight data contract and integration catalogue for a fictional Finnish builder, **Routa Rakennus Oyj**. Data contracts, checkpoints, dependencies and owners on one platform. Every name, system and number is invented.
 
 ## Try it on GitHub Pages
 
-| Version | Link | What it shows |
+| Page | Link | What it shows |
 |---|---|---|
-| Main | [jussikauhanen.github.io/datapipes](https://jussikauhanen.github.io/datapipes/) | 30 data flows: one line per flow, cards per flow, or one card per system |
-| v2 | [jussikauhanen.github.io/datapipes/v2](https://jussikauhanen.github.io/datapipes/v2/) | Copy of the main page |
-| v3 | [jussikauhanen.github.io/datapipes/v3](https://jussikauhanen.github.io/datapipes/v3/) | Sidebar of contracts and systems, live checkpoints (green, yellow, red), relationship diagrams per system |
-| v-beta | [jussikauhanen.github.io/datapipes/v-beta](https://jussikauhanen.github.io/datapipes/v-beta/) | Landscape map of everything, and a contract × system grid |
+| Demo (v3) | [jussikauhanen.github.io/datapipes/v3](https://jussikauhanen.github.io/datapipes/v3/) | Contracts and systems in a sidebar, live checkpoints turning green, yellow and red, relationship diagrams per system, Sankey system map |
+| Landscape (beta) | [jussikauhanen.github.io/datapipes/v-beta](https://jussikauhanen.github.io/datapipes/v-beta/) | Everything on one screen: landscape map and a contract × system grid |
+| How to get here | [jussikauhanen.github.io/datapipes/guide](https://jussikauhanen.github.io/datapipes/guide/) | For data architects: why contracts, the data model from simple to hard, what systems send, how contracts are managed, how expectations and retention work, decisions needed |
 
-Locally: run `python3 -m http.server 8000` in the repository root and open `http://localhost:8000/`, `/v3/` or `/v-beta/`. Opening `index.html` straight from disk does not load the data.
+The root address, [jussikauhanen.github.io/datapipes](https://jussikauhanen.github.io/datapipes/), forwards to the demo.
 
-All names, systems and numbers are invented.
+## Run locally
 
-A separate copy of the prototype that tests the same idea at 30 flows. The simple version in the repository root is unchanged; v2 has its own page, styles, script and data.
-
-Open it at `http://localhost:8000/v2/` (run `python3 -m http.server 8000` in the repository root), or `/datapipes/v2/` on GitHub Pages.
-
-## What is different from v1
-
-- **Columns are stage types, not systems.** Only the stage types used by something on screen become columns, so a board for Site has no Dynamics column if no site flow touches Dynamics.
-- **Paths come from the events.** The register no longer lists which systems a flow passes through. The page starts at the event with no `source` and follows the `source` links. Two systems in the same stage (an API gateway then the integration hub, Lakehouse then Reporting) stack in order.
-- **A skipped stage is a thin dashed line**, not an empty box.
-- **Three views:** one line per flow (fits 30 flows on a screen), cards (lanes per flow), and by system (each system once, with a square per flow passing through it).
-- **One board per area:** Finance, Procurement, Projects, Site, Sales & customers, People, Sustainability.
-- **"What passes here" without the data.** Each step's side panel shows record count, the contract's fields with type and security level, missing-value counts from the event, and the shape of one record with placeholders instead of values. Secret fields show as pseudonymised after the integration hub.
-
-## The event
-
-Same as v1, with two optional fields that describe the data without containing it:
-
-```json
-{
-  "system_id": "INT-01",
-  "system_name": "Integration hub",
-  "stage": "integration",
-  "flow": "supplier-invoices",
-  "source": "SRC-INV",
-  "status": "failed",
-  "date": "2026-11-12T09:22:00+02:00",
-  "security_level": "confidential",
-  "records": 2950,
-  "message": "Mapping error: po_number missing in 112 of 2 950 rows",
-  "profile": { "po_number": { "missing": 112 } }
-}
+```sh
+python3 -m http.server 8000
+# open http://localhost:8000/v3/, /v-beta/ or /guide/
 ```
 
-## Data
+Opening an `index.html` straight from disk does not load the data files.
 
-`data/register.json` (stages, areas, systems with owner and clearance, flows with contract and fields) and `data/events.json` (seed feed). Both were generated for the demo; every name and number is invented.
+## Layout
+
+```
+index.html        forwards to v3/
+v3/               the demo: engine.js (simulator + status model), app.js, data/
+v-beta/           landscape and grid, same engine and data
+guide/            how to get from the demo to the real thing
+```
+
+The simulator in `engine.js` plays the systems and emits checkpoint events; the pages only read those events. `data/register.json` holds systems, owners and contracts; `data/simulation.json` describes the fake world behind the demo.
