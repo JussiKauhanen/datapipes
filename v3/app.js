@@ -72,6 +72,8 @@
   const closed = new Set();
   let filterQ = '';
   let route = { view: 'overview' };
+  let mapMode = store.get('routa-map') || 'sankey', mapInt = store.get('routa-map-int') !== '0';
+  let mapHover = null;   // { kind: 'node' | 'k', id } kept across live re-renders
   const tips = new Map();
 
   P.load().then(({ reg: r, sim }) => {
@@ -179,7 +181,7 @@
       tips.clear();
       html = systemView(s);
     } else {
-      sig = 'o' + M.contracts.map((k) => k.tone + (k.worst ? k.worst.key + k.worst.state : '')).join() + M.links.map((l) => l.tone).join('');
+      sig = 'o' + mapMode + mapInt + M.contracts.map((k) => k.tone + (k.worst ? k.worst.key + k.worst.state : '') + k.hops.map((h) => h.tone[0]).join('')).join() + M.links.map((l) => l.tone).join('');
       if (sig === lastSig) return;
       tips.clear();
       html = overview();
@@ -234,8 +236,17 @@
 
       <section class="sect">
         <h2>System map</h2>
-        <p class="sub">Every system once, in its stage. A line means at least one contract passes between the two; thicker means more contracts. Hover a system to see its neighbours, click to open it.</p>
-        <div class="map-wrap">${systemMap()}</div>
+        <div class="map-tools">
+          <div class="seg" role="group" aria-label="Map style">
+            <button type="button" data-map="sankey" aria-pressed="${mapMode === 'sankey'}">Sankey</button>
+            <button type="button" data-map="lines" aria-pressed="${mapMode === 'lines'}">Lines</button>
+          </div>
+          ${mapMode === 'sankey' ? `<label class="chk"><input type="checkbox" id="map-int" ${mapInt ? 'checked' : ''}> Show integration layer</label>` : ''}
+        </div>
+        <p class="sub">${mapMode === 'sankey'
+          ? 'Each contract is one band. A system is as tall as the number of contracts passing it, so busy systems like the integration hub get room for every band. Band colour is that contract\'s checkpoint at the system it flows into. Hover a band or a system to light up whole paths; click to open.'
+          : 'Every system once, in its stage. A line means at least one contract passes between the two; thicker means more contracts. Hover a system to see its neighbours, click to open it.'}</p>
+        <div class="map-wrap">${mapMode === 'sankey' ? sankeyMap() : systemMap()}</div>
         ${legend()}
       </section>
 
@@ -260,6 +271,106 @@
   function legend() {
     return `<div class="legend-row"><span>${td('ok')} passing</span><span>${td('transit')} in transit</span><span>${td('late')} late</span><span>${td('bad')} red</span><span>${td('wait')} waiting</span>
       ${reg.stages.map((s) => `<span>${ic(s.id, 'sm')}${esc(s.name)}</span>`).join('')}</div>`;
+  }
+
+  // Sankey map: one band per contract between consecutive checkpoints. Node height = contracts through it,
+  // so a system with 28 contracts gets 28 slots instead of 28 lines meeting in one point.
+  function sankeyMap() {
+    const SLOT = 7, MINH = 22, GAP = 8, BAR = 12, top = 34, pad = 14;
+    const isInt = (sid) => M.systems[sid] && M.systems[sid].sys.stage === 'integration';
+    const rankT = (t) => P.TONE_RANK[t];
+    // visible checkpoints per contract, and the segments between them
+    const segs = [], visits = {};
+    M.contracts.forEach((k, ci) => {
+      const hs = k.hops.filter((h) => mapInt || !isInt(h.sys.id));
+      hs.forEach((h) => { (visits[h.sys.id] ||= []).push(ci); });
+      for (let i = 1; i < hs.length; i++) {
+        const a = hs[i - 1], b = hs[i];
+        const skipped = k.hops.slice(a.i + 1, b.i);   // integration hops hidden between them
+        // the band shows the checkpoint it flows into, unless a hidden hop on the way is worse
+        let tone = b.tone;
+        skipped.forEach((h) => { if (h.tone !== 'ok' && rankT(h.tone) > rankT(tone)) tone = h.tone; });
+        segs.push({ k, ci, from: a.sys.id, to: b.sys.id, tone, via: skipped.map((h) => h.sys.id), target: b });
+      }
+    });
+    const ids = Object.keys(visits);
+    // a second system in the same stage (API gateway -> hub, Lakehouse -> Reporting) gets its own sub-column
+    const stageOf = (id) => M.systems[id].sys.stage;
+    const lvl = Object.fromEntries(ids.map((id) => [id, 0]));
+    for (let r = 0; r < 3; r++) segs.forEach((g) => { if (stageOf(g.from) === stageOf(g.to)) lvl[g.to] = Math.max(lvl[g.to], lvl[g.from] + 1); });
+    const colKeys = [];
+    reg.stages.forEach((st) => { for (let l = 0; l <= 3; l++) if (ids.some((id) => stageOf(id) === st.id && lvl[id] === l)) colKeys.push(`${st.id}:${l}`); });
+    const colOf = Object.fromEntries(ids.map((id) => [id, colKeys.indexOf(`${stageOf(id)}:${lvl[id]}`)]));
+    const cols = colKeys.map((_, c) => ids.filter((id) => colOf[id] === c));
+    const hgt = (id) => Math.max(MINH, visits[id].length * SLOT);
+    // order within columns: start by contract order, then a few barycentre sweeps to cut crossings
+    const ord = Object.fromEntries(ids.map((id) => [id, Math.min(...visits[id])]));
+    const ypos = {};
+    const place = () => cols.forEach((list) => { let y = 0; list.forEach((id) => { ypos[id] = y + hgt(id) / 2; y += hgt(id) + GAP; }); });
+    cols.forEach((list) => list.sort((a, b) => ord[a] - ord[b]));
+    place();
+    for (let sweep = 0; sweep < 4; sweep++) {
+      const fwd = sweep % 2 === 0;
+      const range = fwd ? cols.map((_, i) => i).slice(1) : cols.map((_, i) => i).slice(0, -1).reverse();
+      range.forEach((c) => {
+        cols[c].forEach((id) => {
+          const ns = segs.filter((g) => (fwd ? g.to === id : g.from === id)).map((g) => ypos[fwd ? g.from : g.to]);
+          if (ns.length) ord[id] = ns.reduce((a, b) => a + b, 0) / ns.length;
+        });
+        cols[c].sort((a, b) => ord[a] - ord[b]);
+        place();
+      });
+    }
+    // geometry
+    const colH = cols.map((list) => list.reduce((a, id) => a + hgt(id) + GAP, -GAP));
+    const maxH = Math.max(...colH);
+    // draw at real pixel size: fit the pane, but never squeeze a column below 118 px
+    const avail = Math.max(700, (($('#view') && $('#view').clientWidth) || 1100) - 62);
+    const colW = Math.max(118, (avail - pad * 2 - BAR) / Math.max(1, colKeys.length - 1));
+    const W = pad * 2 + BAR + colW * Math.max(1, colKeys.length - 1);
+    const maxChars = Math.max(10, Math.floor((colW - BAR - 34) / 6.4));
+    const node = {};
+    cols.forEach((list, c) => {
+      let y = top + (maxH - colH[c]) / 2;
+      list.forEach((id) => { node[id] = { x: pad + c * colW, y, h: hgt(id) }; y += hgt(id) + GAP; });
+    });
+    const H = top + maxH + 12;
+    // slots: outgoing ordered by target height, incoming by source height
+    const outs = {}, ins = {};
+    segs.forEach((g) => { (outs[g.from] ||= []).push(g); (ins[g.to] ||= []).push(g); });
+    const cy = (id) => node[id].y + node[id].h / 2;
+    const slotY = (id, list, g) => {
+      const n = list.length, start = node[id].y + (node[id].h - n * SLOT) / 2;
+      return start + list.indexOf(g) * SLOT;
+    };
+    Object.entries(outs).forEach(([, l]) => l.sort((a, b) => cy(a.to) - cy(b.to) || a.ci - b.ci));
+    Object.entries(ins).forEach(([, l]) => l.sort((a, b) => cy(a.from) - cy(b.from) || a.ci - b.ci));
+    const w = SLOT - 1.2;
+    const bands = segs.map((g, i) => {
+      const A = node[g.from], B = node[g.to];
+      const x1 = A.x + BAR, x2 = B.x, y1 = slotY(g.from, outs[g.from], g), y2 = slotY(g.to, ins[g.to], g);
+      const xm = (x1 + x2) / 2;
+      tips.set(`b${i}`, `<dl><dt>${esc(g.k.c.name)}</dt><dd>${esc(g.from)} → ${g.via.length ? esc(g.via.join(' → ')) + ' → ' : ''}${esc(g.to)}</dd><dt>At ${esc(g.target.sys.name)}</dt><dd>${esc(STATE_TXT[g.target.state])}</dd></dl>`);
+      return `<path class="band t-${g.tone}" data-k="${esc(g.k.c.id)}" data-tipkey="b${i}" d="M${x1},${y1} C${xm},${y1} ${xm},${y2} ${x2},${y2} L${x2},${y2 + w} C${xm},${y2 + w} ${xm},${y1 + w} ${x1},${y1 + w} Z"/>`;
+    }).join('');
+    const col = { ok: 'var(--t-ok)', transit: 'var(--t-transit)', late: 'var(--t-late)', bad: 'var(--t-bad)', wait: 'var(--t-wait)' };
+    const last = colKeys.length - 1;
+    const nodesSvg = ids.map((id) => {
+      const n = node[id], S0 = M.systems[id], c = colOf[id];
+      const full = S0.sys.name.replace(/^Dynamics 365 /, 'D365 ');
+      const name = full.length > maxChars ? full.slice(0, maxChars - 1) + '…' : full;
+      const right = c !== last;
+      const lx = right ? n.x + BAR + 6 : n.x - 6, ly = n.y + Math.min(n.h / 2, 13) + 4;
+      tips.set(`sn${id}`, `<dl><dt>${esc(S0.sys.name)}</dt><dd>${esc(id)} · ${esc(S0.sys.owner)}</dd><dt>Contracts</dt><dd>${visits[id].length}${S0.bad ? ` · ${S0.bad} late or red` : ''}</dd></dl>`);
+      return `<g class="snode" data-id="${esc(id)}" data-k="${visits[id].map((ci) => M.contracts[ci].c.id).join(' ')}" data-tipkey="sn${esc(id)}" tabindex="0" role="link" aria-label="${esc(S0.sys.name)}, ${visits[id].length} contracts">
+        <rect x="${n.x}" y="${n.y}" width="${BAR}" height="${n.h}" rx="3" fill="${col[S0.tone]}"/>
+        <text x="${lx}" y="${ly}" text-anchor="${right ? 'start' : 'end'}">${esc(name)} <tspan class="c">${visits[id].length}</tspan></text></g>`;
+    }).join('');
+    const heads = reg.stages.map((st) => {
+      const c = colKeys.indexOf(`${st.id}:0`);
+      return c < 0 ? '' : `<text class="colh" x="${pad + c * colW}" y="20">${esc(st.name)}</text>`;
+    }).join('');
+    return `<svg id="sankey" width="${Math.round(W)}" height="${Math.round(H)}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sankey map: one band per contract between systems">${heads}<g>${bands}</g><g>${nodesSvg}</g></svg>`;
   }
 
   // Confluent-style map: columns per stage, links between systems aggregated over contracts
@@ -456,12 +567,50 @@
     });
     svg.innerHTML = paths.join('');
   }
-  addEventListener('resize', () => drawEgo());
+  let rsz;
+  addEventListener('resize', () => {
+    drawEgo();
+    clearTimeout(rsz);
+    rsz = setTimeout(() => { if (route.view === 'overview' && mapMode === 'sankey') { lastSig = ''; renderView(); } }, 200);
+  });
 
   // ---------- after render: tooltips, map hover, buttons ----------
   function afterRender() {
     drawEgo();
     $('#to-list')?.addEventListener('click', () => $('#sys-contracts').scrollIntoView({ behavior: 'smooth' }));
+    $$('[data-map]').forEach((b) => b.addEventListener('click', () => {
+      mapMode = b.dataset.map; store.set('routa-map', mapMode); mapHover = null; lastSig = ''; renderView();
+    }));
+    $('#map-int')?.addEventListener('change', (e) => {
+      mapInt = e.target.checked; store.set('routa-map-int', mapInt ? '1' : '0'); mapHover = null; lastSig = ''; renderView();
+    });
+    const sk = $('#sankey');
+    if (sk) {
+      const bands = $$('.band', sk), snodes = $$('.snode', sk);
+      const light = (h) => {
+        mapHover = h;
+        if (!h) { sk.classList.remove('hl'); bands.forEach((b) => b.classList.remove('lit')); snodes.forEach((n) => n.classList.remove('lit')); return; }
+        // the contracts to light: one band's contract, or every contract through a system
+        const ks = new Set(h.kind === 'k' ? [h.id] : (snodes.find((n) => n.dataset.id === h.id)?.dataset.k || '').split(' '));
+        sk.classList.add('hl');
+        bands.forEach((b) => b.classList.toggle('lit', ks.has(b.dataset.k)));
+        snodes.forEach((n) => n.classList.toggle('lit', n.dataset.k.split(' ').some((k) => ks.has(k))));
+      };
+      bands.forEach((b) => {
+        b.addEventListener('mouseenter', () => light({ kind: 'k', id: b.dataset.k }));
+        b.addEventListener('mouseleave', () => light(null));
+        b.addEventListener('click', () => { location.hash = '#/c/' + encodeURIComponent(b.dataset.k); });
+      });
+      snodes.forEach((n) => {
+        n.addEventListener('mouseenter', () => light({ kind: 'node', id: n.dataset.id }));
+        n.addEventListener('mouseleave', () => light(null));
+        n.addEventListener('focus', () => light({ kind: 'node', id: n.dataset.id }));
+        n.addEventListener('blur', () => light(null));
+        n.addEventListener('click', () => { location.hash = '#/s/' + encodeURIComponent(n.dataset.id); });
+        n.addEventListener('keydown', (e) => { if (e.key === 'Enter') location.hash = '#/s/' + encodeURIComponent(n.dataset.id); });
+      });
+      if (mapHover) light(mapHover);   // keep the highlight through live updates
+    }
     const map = $('#map');
     if (map) {
       const nodes = $$('.mnode', map), links = $$('.mlink', map);
