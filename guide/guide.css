@@ -244,3 +244,24 @@ td:first-child { white-space: nowrap; }
 .lv:nth-child(5) .step { background: #227d9b; }
 small { font-size: 12.5px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .intake .core { color: #1f1f21; } }
+
+/* ---------- hero comic ---------- */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+h1 { max-width: 22ch; }
+.hero2 { font-size: 24px; margin: 46px 0 0; }
+.lede.small { font-size: 17px; margin-top: 8px; }
+.why-img { margin: 30px 0 0; max-width: 900px; }
+.why-img img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border); background: #fff; }
+
+.gets { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.gets > div { border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+.gets > div:first-child { border-top: 4px solid var(--ok); }
+.gets > div:last-child { border-top: 4px solid var(--border-2); }
+.gets b { font-size: 15.5px; }
+.gets ul { margin: 8px 0 0; padding-left: 18px; color: var(--text-2); font-size: 15px; }
+.gets li { margin: 3px 0; }
+@media (max-width: 700px) { .gets { grid-template-columns: 1fr; } }
+
+.snip .tr { color: var(--bad-text); font-weight: 500; }
+.snip .ty { color: var(--late-text); background: var(--ph-bg); border-radius: 3px; padding: 0 3px; font-weight: 500; }
+.snip .tg { color: var(--ok-text); font-weight: 500; }

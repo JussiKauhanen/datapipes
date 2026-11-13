@@ -328,6 +328,45 @@ dedupe_on: delivery_id               # webhooks get retried; count each once`,
     result: { system_id: 'SRC-INV', system_name: 'E-invoice operator', stage: 'source', flow: 'supplier-invoices', run_id: 'B-20261113-07', source: null, status: 'ok', date: '2026-11-13T09:21:58+02:00', security_level: 'confidential', records: 2950 },
   };
 
+  // the smallest version: three lists and one rule
+  S.minimal = {
+    file: 'minimal.json', lang: 'json',
+    tabs: [['example', 'Three lists'], ['template', 'Template'], ['rule', 'The rule']],
+    langs: { rule: 'text' },
+    notes: {
+      example: 'Systems and contracts change rarely; checkpoints are appended as messages pass. Nothing else is needed to get a light per contract.',
+      rule: 'Runs every minute. A dozen lines, no learning, no standards. Good enough to prove the point on three contracts.',
+    },
+    example: {
+      systems: [
+        { id: 'INT-01', owner: 'Noora Ahonen' },
+        { id: 'D365-FIN', owner: 'Ville Koskinen' },
+      ],
+      contracts: [
+        { id: 'supplier-invoices', owner: 'Aino Lehtinen', every_min: 60 },
+      ],
+      checkpoints: [
+        { contract: 'supplier-invoices', system: 'INT-01', at: '2026-11-13T03:02:00+02:00', ok: false },
+      ],
+    },
+    template: {
+      systems: [{ id: '‹SYSTEM-ID›', owner: '‹who to call›' }],
+      contracts: [{ id: '‹contract-id›', owner: '‹business owner›', every_min: '‹how often it should arrive›' }],
+      checkpoints: [{ contract: '‹contract-id›', system: '‹SYSTEM-ID›', at: '‹when it passed›', ok: '‹true | false›' }],
+    },
+    rule: `# the whole rule, run every minute
+for each contract:
+    last = newest checkpoint of this contract
+    if last.ok is false:
+        red      → tell the owner of last.system
+    elif minutes since last.at > 3 × every_min:
+        red      → tell the contract owner
+    elif minutes since last.at > every_min + 10:
+        yellow
+    else:
+        green`,
+  };
+
   // colouring
   function jsonHtml(obj) {
     return esc(JSON.stringify(obj, null, 2)).replace(/("(?:[^"\\]|\\.)*")(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?)/g, (m, str, colon) => {
@@ -353,8 +392,10 @@ dedupe_on: delivery_id               # webhooks get retried; count each once`,
     }).join('\n');
   }
   const langOf = (sn, w) => (sn.langs && sn.langs[w]) || sn.lang;
-  const render = (sn, w) => (langOf(sn, w) === 'yaml' ? yamlHtml(sn[w]) : jsonHtml(sn[w]));
-  const plain = (sn, w) => (langOf(sn, w) === 'yaml' ? sn[w] : JSON.stringify(sn[w], null, 2));
+  const textHtml = (t) => esc(t).split('\n').map((l) => { const i = l.indexOf('#'); return i < 0 ? l : esc(l.slice(0, i)).replace(/&amp;/g, '&') + `<span class="c">${l.slice(i)}</span>`; }).join('\n')
+    .replace(/\b(red|yellow|green)\b/g, (m) => `<span class="t${m[0]}">${m}</span>`);
+  const render = (sn, w) => { const l = langOf(sn, w); return l === 'yaml' ? yamlHtml(sn[w]) : l === 'text' ? textHtml(sn[w]) : jsonHtml(sn[w]); };
+  const plain = (sn, w) => (langOf(sn, w) === 'json' ? JSON.stringify(sn[w], null, 2) : sn[w]);
 
   $$('[data-snip]').forEach((box) => {
     const sn = S[box.dataset.snip];
@@ -400,4 +441,5 @@ dedupe_on: delivery_id               # webhooks get retried; count each once`,
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
 })();

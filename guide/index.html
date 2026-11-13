@@ -30,6 +30,7 @@
   <nav class="toc" aria-label="On this page">
     <b>On this page</b>
     <a href="#why">Why contracts</a>
+    <a href="#minimal">The smallest version</a>
     <a href="#model">The data model</a>
     <a href="#standards">Open standards</a>
     <a href="#send">Ways in</a>
@@ -41,9 +42,14 @@
   </nav>
 
   <main>
-    <p class="eyebrow">From demo to real</p>
-    <h1>How to get from this demo to the real thing</h1>
-    <p class="lede">The demo runs on four small things: a register of systems and owners, a contract per data flow, one event each system sends when a message passes, and expectations for when it should arrive. Here is what each one is, how to start simple, which open standards to build on, and what we need to decide.</p>
+    <p class="eyebrow">Data contracts and checkpoints</p>
+    <h1>Find out at 03:05, not in the 09:00 meeting.</h1>
+    <p class="lede">Every data flow gets a promise, an owner, and a light that shows whether the promise is being kept. When something stops, the person who can fix it hears first, not the person who needed the numbers.</p>
+    <figure class="why-img">
+      <img src="why-comic.png" width="1363" height="1154" alt="Four-panel comic. 03:00: a feed between invoices and finance quietly stops, and nobody notices. 09:00: someone finds out in a meeting when committed cost shows zero. 09:15: three people say not ours, ask IT, the vendor. With checkpoints: a warning lights at the integration step at 03:05, the owner gets a message that supplier invoices are late at the integration hub, and says she is on it.">
+    </figure>
+    <h2 class="hero2">From this demo to the real thing</h2>
+    <p class="lede small">The demo runs on four small things: a register of systems and owners, a contract per data flow, one event each system sends when a message passes, and expectations for when it should arrive. Here is what each one is, how to start simple, which open standards to build on, and what we need to decide.</p>
     <div class="steps4">
       <a href="#model"><span class="n">01</span><b>Model</b><span>Systems, contracts, checkpoints. Start with a spreadsheet.</span></a>
       <a href="#send"><span class="n">02</span><b>Signal</b><span>One small event per checkpoint, many ways to send it. No data values.</span></a>
@@ -68,8 +74,23 @@
     </section>
 
     <!-- ===================================================== -->
+    <section id="minimal">
+      <span class="secnum">02 · Smallest</span>
+      <h2>The smallest version that works</h2>
+      <p class="sub">Before standards, catalogues or learning: three lists and one rule. A spreadsheet and a script that runs every minute would do.</p>
+      <div data-snip="minimal"></div>
+      <div class="gets">
+        <div><b>What it already gives</b>
+          <ul><li>A light per contract: green, yellow, red</li><li>Who to call when it goes red</li><li>Failures and late arrivals, not just failures</li></ul></div>
+        <div><b>What it doesn't give yet</b>
+          <ul><li><i>Where</i> in the pipe it stopped: needs a checkpoint per system (level 3)</li><li>Who else breaks: needs readers (level 4)</li><li>Secret data held back: needs security levels (levels 1 and 3)</li><li>Sharper timing: needs learned expectations</li></ul></div>
+      </div>
+      <p style="color:var(--text-2);font-size:15px;margin-top:14px">Each level of the data model below adds one of those. You can stop at any level and still have something useful.</p>
+    </section>
+
+    <!-- ===================================================== -->
     <section id="model">
-      <span class="secnum">02 · Model</span>
+      <span class="secnum">03 · Model</span>
       <h2>The data model, from simple to hard</h2>
       <p class="sub">Five levels. Each one is useful on its own, and each one builds on the previous. Most of the value arrives at level 3; level 4 is where it gets precise; level 5 connects it to what the business calls things.</p>
 
@@ -149,7 +170,7 @@
 
     <!-- ===================================================== -->
     <section id="standards">
-      <span class="secnum">03 · Standards</span>
+      <span class="secnum">04 · Standards</span>
       <h2>Built on open standards, not our own formats</h2>
       <p class="sub">The demo uses its own small formats so it is easy to read. For real, each piece has an open standard. Using them costs little and means catalogues, lineage tools and BI tools can read what we produce.</p>
       <div class="tw"><table>
@@ -166,7 +187,7 @@
 
     <!-- ===================================================== -->
     <section id="send">
-      <span class="secnum">04 · Ways in</span>
+      <span class="secnum">05 · Ways in</span>
       <h2>What systems send, and the ways in</h2>
       <p class="sub">One small event when a message passes, and one when it fails. Never the data itself. How it arrives is up to the system.</p>
       <div class="tw"><table>
@@ -214,7 +235,7 @@
 
     <!-- ===================================================== -->
     <section id="manage">
-      <span class="secnum">05 · Manage</span>
+      <span class="secnum">06 · Manage</span>
       <h2>How contracts are managed</h2>
       <p class="sub">Contracts live as ODCS files in git, one per contract. Changing one is a pull request. The catalogue and the board are built from the files.</p>
       <div class="flow">
@@ -241,7 +262,7 @@
 
     <!-- ===================================================== -->
     <section id="expect">
-      <span class="secnum">06 · Expect</span>
+      <span class="secnum">07 · Expect</span>
       <h2>When should a checkpoint turn yellow?</h2>
       <p class="sub">The colours are only as good as the expectations behind them. There are three ways to set them.</p>
       <div class="opts">
@@ -270,7 +291,7 @@
 
     <!-- ===================================================== -->
     <section id="keep">
-      <span class="secnum">07 · Keep</span>
+      <span class="secnum">08 · Keep</span>
       <h2>What we keep, and for how long</h2>
       <p class="sub">Checkpoints are small but many: 30 contracts at five hops each already produce thousands a day. Keep detail short, keep summaries long. The values below are starting points to agree on.</p>
       <div class="tw"><table>
@@ -288,7 +309,7 @@
 
     <!-- ===================================================== -->
     <section id="road">
-      <span class="secnum">08 · Getting there</span>
+      <span class="secnum">09 · Getting there</span>
       <h2>A path that starts small</h2>
       <p class="sub">Each step is useful on its own, and each one can stop if it doesn't pay off.</p>
       <ol class="road">
@@ -302,7 +323,7 @@
 
     <!-- ===================================================== -->
     <section id="decide">
-      <span class="secnum">09 · Decide</span>
+      <span class="secnum">10 · Decide</span>
       <h2>Decisions needed from architecture</h2>
       <ul class="decide">
         <li><b>Adopt ODCS and OpenLineage</b>Contracts in ODCS from day one; checkpoints stored as OpenLineage. Ossie watched for the semantic layer.</li>
