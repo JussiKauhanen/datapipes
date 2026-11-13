@@ -26,7 +26,7 @@
         id: '‹SYSTEM-ID›',
         name: '‹human name›',
         stage: '‹source | integration | dynamics | apps | analytics›',
-        owner: { team: '‹owning team›', business_owner: '‹person who answers for the meaning›', steward: '‹person who answers for the feed›', contact: '‹team channel or mailbox›' },
+        owner: { team: '‹owning team›', manager: '‹who hears if nobody picks it up›', channel: '‹team channel for alerts›' },
         clearance: '‹highest security level it may hold›',
         environment: '‹prod | test›',
       },
@@ -34,7 +34,7 @@
         id: 'INT-01',
         name: 'Integration hub',
         stage: 'integration',
-        owner: { team: 'Integration team', business_owner: 'Noora Ahonen', steward: 'Sami Koivisto', contact: '#integration-team' },
+        owner: { team: 'Integration team', manager: 'Noora Ahonen', channel: '#integration-team' },
         clearance: 'secret',
         environment: 'prod',
       },
@@ -47,7 +47,7 @@
         version: '‹1.0.0›',
         area: '‹Finance | Projects | Site | …›',
         status: '‹draft | active | deprecated›',
-        owner: '‹business owner›',
+        owner: { team: '‹owning team›', manager: '‹manager›' },
         producer: '‹SYSTEM-ID where the data starts›',
         consumers: ['‹SYSTEM-ID›', '‹SYSTEM-ID›'],
         schedule: { every_min: '‹60›', window: '‹when it runs, e.g. Mon–Fri 06–22›' },
@@ -59,7 +59,7 @@
         version: '2.1.0',
         area: 'Finance',
         status: 'active',
-        owner: 'Aino Lehtinen',
+        owner: { team: 'Finance', manager: 'Aino Lehtinen' },
         producer: 'SRC-INV',
         consumers: ['D365-FIN', 'APP-PRC', 'ANA-01'],
         schedule: { every_min: 60, window: 'Mon–Fri 06:00–22:00 Europe/Helsinki' },
@@ -135,8 +135,9 @@ id: ‹contract-id›
 version: ‹1.0.0›          # major = breaking for readers, minor = safe
 status: ‹draft | active | deprecated›
 owner:
-  business: ‹person›      # answers for what the data means
-  steward: ‹person›       # answers for the feed and for change notices
+  team: ‹owning team›     # gets the alerts and answers for the feed
+  manager: ‹person›       # approves changes, hears about anything not picked up
+  channel: "‹#team-channel›"
 producer: ‹SYSTEM-ID›
 schedule:
   every: ‹60m›
@@ -154,8 +155,9 @@ id: supplier-invoices
 version: 2.1.0
 status: active
 owner:
-  business: Aino Lehtinen
-  steward: Ville Koskinen
+  team: Finance
+  manager: Aino Lehtinen
+  channel: "#finance"
 producer: SRC-INV
 schedule:
   every: 60m
@@ -231,12 +233,12 @@ slaProperties:
     value: 5
     unit: m
 team:
-  - username: aino.lehtinen
+  - username: finance          # the owning team
     role: owner
-  - username: ville.koskinen
-    role: steward
+  - username: aino.lehtinen
+    role: manager
 support:
-  - channel: "#finance-data"
+  - channel: "#finance"
 customProperties:
   - property: producer
     value: SRC-INV
@@ -244,7 +246,7 @@ customProperties:
     value: [APP-PRC, ANA-01]`;
   S.contract.tabs = [['template', 'Template'], ['example', 'Example'], ['odcs', 'ODCS']];
   S.contract.langs = { odcs: 'yaml' };
-  S.contract.notes = { odcs: 'Same contract in the Open Data Contract Standard. Owner, steward, SLA and field classification all have a place.' };
+  S.contract.notes = { odcs: 'Same contract in the Open Data Contract Standard. Owning team, manager, SLA and field classification all have a place.' };
   S.yaml.odcs = S.contract.odcs;
   S.yaml.tabs = [['odcs', 'ODCS'], ['example', 'Short form'], ['template', 'Template']];
   S.yaml.notes = { odcs: 'The file in git is ODCS, so other tools can read it. The short form is what the demo uses.', example: 'The demo’s own short form, easier to read in a slide.' };
@@ -339,28 +341,28 @@ dedupe_on: delivery_id               # webhooks get retried; count each once`,
     },
     example: {
       systems: [
-        { id: 'INT-01', owner: 'Noora Ahonen' },
-        { id: 'D365-FIN', owner: 'Ville Koskinen' },
+        { id: 'INT-01', team: 'Integration team', channel: '#integration-team' },
+        { id: 'D365-FIN', team: 'ERP team', channel: '#erp-team' },
       ],
       contracts: [
-        { id: 'supplier-invoices', owner: 'Aino Lehtinen', every_min: 60 },
+        { id: 'supplier-invoices', team: 'Finance', channel: '#finance', every_min: 60 },
       ],
       checkpoints: [
         { contract: 'supplier-invoices', system: 'INT-01', at: '2026-11-13T03:02:00+02:00', ok: false },
       ],
     },
     template: {
-      systems: [{ id: '‹SYSTEM-ID›', owner: '‹who to call›' }],
-      contracts: [{ id: '‹contract-id›', owner: '‹business owner›', every_min: '‹how often it should arrive›' }],
+      systems: [{ id: '‹SYSTEM-ID›', team: '‹owning team›', channel: '‹where alerts go›' }],
+      contracts: [{ id: '‹contract-id›', team: '‹owning team›', channel: '‹where alerts go›', every_min: '‹how often it should arrive›' }],
       checkpoints: [{ contract: '‹contract-id›', system: '‹SYSTEM-ID›', at: '‹when it passed›', ok: '‹true | false›' }],
     },
     rule: `# the whole rule, run every minute
 for each contract:
     last = newest checkpoint of this contract
     if last.ok is false:
-        red      → tell the owner of last.system
+        red      → post in the channel of last.system's team
     elif minutes since last.at > 3 × every_min:
-        red      → tell the contract owner
+        red      → post in the contract team's channel
     elif minutes since last.at > every_min + 10:
         yellow
     else:

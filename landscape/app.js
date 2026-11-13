@@ -1,5 +1,5 @@
 /* Routa · data landscape (beta)
-   Same events and model as v3, shown two other ways: a landscape of nested boxes, and a contract × system grid. */
+   Same events and model as the demo, shown two other ways: a landscape of nested boxes, and a contract × system grid. */
 (() => {
   'use strict';
   const P = window.Pipe;
@@ -25,6 +25,9 @@
   const TEAM_COL = ['#579dff', '#2ebd85', '#f5cd47', '#9f8fef', '#fea362', '#6cc3e0', '#f87168', '#94c748', '#e774bb', '#8590a2', '#c97cf4', '#4bce97', '#ffd5d2', '#b8acf6'];
   const tp = (tone, text) => `<span class="tp ${esc(tone)}">${esc(text || TONE[tone])}</span>`;
   const td = (tone) => `<span class="td ${esc(tone)}" aria-hidden="true"></span>`;
+  const teamInitials = (t) => t.replace(/\bteam\b/i, '').trim().split(/[\s&]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase() || t[0];
+  const tav = (t, lg) => `<span class="av team c${[...t].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6}${lg ? ' lg' : ''}" title="${esc(t)}" aria-hidden="true">${esc(teamInitials(t))}</span>`;
+  const chan = (t) => '#' + t.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const initials = (n) => n.split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
   const av = (n, lg) => `<span class="av c${[...n].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6}${lg ? ' lg' : ''}" title="${esc(n)}" aria-hidden="true">${esc(initials(n))}</span>`;
 
@@ -41,7 +44,7 @@
     setInterval(() => { compute(); $('#clock').textContent = P.hhmmss(S.now()); render(); }, 900);
   }).catch((e) => {
     console.error(e);
-    $('#stage').innerHTML = '<p>The page reads files from <code>data/</code>, which browsers block when opened straight from disk. Run <code>python3 -m http.server</code> in the repository folder and open <code>http://localhost:8000/v-beta/</code>.</p>';
+    $('#stage').innerHTML = '<p>The page reads files from <code>data/</code>, which browsers block when opened straight from disk. Run <code>python3 -m http.server</code> in the repository folder and open <code>http://localhost:8000/landscape/</code>.</p>';
   });
   function compute() { M = P.derive(reg, S.events, S.now()); }
 
@@ -51,7 +54,7 @@
     if (ui.colour === 'team') { const i = teams.indexOf(h.sys.team); return { cls: '', cat: h.sys.team, style: `background:${TEAM_COL[i % TEAM_COL.length]};color:#1d2125` }; }
     return { cls: `c-${h.tone}`, cat: h.tone, style: '' };
   }
-  const matchQ = (k) => !ui.q || `${k.c.name} ${k.c.contract} ${k.hops.map((h) => `${h.sys.id} ${h.sys.name} ${h.sys.owner}`).join(' ')}`.toLowerCase().includes(ui.q.toLowerCase());
+  const matchQ = (k) => !ui.q || `${k.c.name} ${k.c.contract} ${k.hops.map((h) => `${h.sys.id} ${h.sys.name} ${h.sys.owner} ${h.sys.team}`).join(' ')}`.toLowerCase().includes(ui.q.toLowerCase());
 
   // ---------- render ----------
   let lastSig = '', lastDrawerSig = '';
@@ -83,7 +86,7 @@
 
   function tile(h) {
     const c = colourOf(h), dim = ui.hidden.has(c.cat) ? ' dim' : '';
-    const title = `${h.sys.name} (${h.sys.id}) · ${STATE_TXT[h.state]} · ${h.sys.owner}${h.e ? ' · ' + h.e.security_level : ''}`;
+    const title = `${h.sys.name} (${h.sys.id}) · ${STATE_TXT[h.state]} · ${h.sys.team}${h.e ? ' · ' + h.e.security_level : ''}`;
     return `<span class="tile ${c.cls}${h.state === 'transit' && ui.colour === 'status' ? ' transit' : ''}${dim}" style="${c.style}" title="${esc(title)}">${esc(h.sys.id)}<small>${esc(short(h.sys.name))}</small></span>`;
   }
   const short = (n) => (n.length > 16 ? n.slice(0, 15) + '…' : n);
@@ -113,7 +116,7 @@
     const firstOfStage = new Set(stageSpans.map(([st]) => cols.find((s) => s.sys.stage === st.id).sys.id));
     const selCol = ui.sel && ui.sel.kind === 's' ? ui.sel.id : null;
     const head1 = `<tr><th class="rowh"></th>${stageSpans.map(([st, n]) => `<th colspan="${n}">${esc(st.name)}</th>`).join('')}</tr>`;
-    const head2 = `<tr><th class="rowh" style="vertical-align:bottom;padding:8px 10px;font:600 12px var(--sans);color:var(--text-2)">Contract</th>${cols.map((s) => `<th data-col="${esc(s.sys.id)}" class="${selCol === s.sys.id ? 'colsel' : ''}" title="${esc(`${s.sys.name} · ${s.sys.owner} · ${s.hops.length} contracts`)}"><span class="vt">${esc(s.sys.name)}</span></th>`).join('')}</tr>`;
+    const head2 = `<tr><th class="rowh" style="vertical-align:bottom;padding:8px 10px;font:600 12px var(--sans);color:var(--text-2)">Contract</th>${cols.map((s) => `<th data-col="${esc(s.sys.id)}" class="${selCol === s.sys.id ? 'colsel' : ''}" title="${esc(`${s.sys.name} · ${s.sys.team} · ${s.hops.length} contracts`)}"><span class="vt">${esc(s.sys.name)}</span></th>`).join('')}</tr>`;
     const body = reg.areas.map((a) => {
       const ks = M.contracts.filter((k) => k.c.area === a.id);
       if (!ks.length) return '';
@@ -187,12 +190,12 @@
       crumb = `Contracts <span>/</span> ${esc(areaName(k.c.area))}`;
       body = `<h2 id="dr-title">${esc(k.c.name)}</h2>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tp(k.tone, w ? STATE_TXT[w.state] : TONE[k.tone])}<code>${esc(k.c.contract)}</code><span class="muted">runs ${esc(P.every(k.c.every_min))}</span></div>
-        ${w ? `<div class="callout ${k.tone}">${av(who.owner, true)}<div class="txt"><b>${esc(STATE_TXT[w.state])} at ${esc(w.sys.name)} · call ${esc(who.owner)}</b>${esc(w.why)}</div></div>` : ''}
+        ${w ? `<div class="callout ${k.tone}">${tav(who.team, true)}<div class="txt"><b>${esc(STATE_TXT[w.state])} at ${esc(w.sys.name)} · ${esc(who.team)} is told in ${esc(chan(who.team))}</b>${esc(w.why)} <span class="muted">· Manager: ${esc(who.owner)}</span></div></div>` : ''}
         <h4>Checkpoints</h4>
         <div class="chainmini">${k.hops.map((h) => `<div class="hopr"><span class="dot" style="background:${dotStyle(h.tone)}"></span>
-          <span><b>${esc(h.sys.name)}</b><small>${esc(h.sys.id)} · ${esc(stageName(h.sys.stage))} · ${esc(h.sys.owner)}</small></span>
+          <span><b>${esc(h.sys.name)}</b><small>${esc(h.sys.id)} · ${esc(stageName(h.sys.stage))} · ${esc(h.sys.team)}</small></span>
           <span>${tp(h.tone, STATE_TXT[h.state])}</span></div>`).join('')}</div>
-        <a class="btn open-v3" href="../v3/#/c/${encodeURIComponent(k.c.id)}">Open in v3 →</a>`;
+        <a class="btn open-v3" href="../demo/#/c/${encodeURIComponent(k.c.id)}">Open in the demo →</a>`;
     } else {
       const s = M.systems[ui.sel.id];
       if (!s) return;
@@ -202,11 +205,11 @@
       s.hops.forEach((h) => { const k = M.contracts.find((x) => x.c.id === h.contract.id); k.hops.slice(h.i + 1).forEach((x) => downstream.add(x.sys.id)); });
       crumb = `Systems <span>/</span> ${esc(stageName(s.sys.stage))}`;
       body = `<h2 id="dr-title">${esc(s.sys.name)}</h2>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tp(s.tone)}<code>${esc(s.sys.id)}</code><span class="person">${av(s.sys.owner)} ${esc(s.sys.owner)}, ${esc(s.sys.team)}</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tp(s.tone)}<code>${esc(s.sys.id)}</code><span class="person">${tav(s.sys.team)} ${esc(s.sys.team)} · manager ${esc(s.sys.owner)}</span></div>
         <h4>If this system stops</h4>
         <p class="muted" style="margin:0 0 8px">${s.hops.length} contract${s.hops.length === 1 ? '' : 's'} stop here, and ${downstream.size} system${downstream.size === 1 ? '' : 's'} after it stop getting fresh data.</p>
-        <ul class="impact">${s.hops.map((h) => `<li>${td(h.tone)}<a href="../v3/#/c/${encodeURIComponent(h.contract.id)}">${esc(h.contract.name)}</a>${tp(h.tone, STATE_TXT[h.state])}</li>`).join('')}</ul>
-        <a class="btn open-v3" href="../v3/#/s/${encodeURIComponent(s.sys.id)}">Open relationships in v3 →</a>`;
+        <ul class="impact">${s.hops.map((h) => `<li>${td(h.tone)}<a href="../demo/#/c/${encodeURIComponent(h.contract.id)}">${esc(h.contract.name)}</a>${tp(h.tone, STATE_TXT[h.state])}</li>`).join('')}</ul>
+        <a class="btn open-v3" href="../demo/#/s/${encodeURIComponent(s.sys.id)}">Open relationships in the demo →</a>`;
     }
     lastDrawerSig = sig;
     $('#dr-crumb').innerHTML = crumb;

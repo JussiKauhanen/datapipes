@@ -93,3 +93,4 @@ body { overflow: auto; }
 .btn.cta .s { display: none; }
 @media (max-width: 860px) { .btn.cta .l { display: none; } .btn.cta .s { display: inline; } }
 @media (max-width: 600px) { .appbar .vtag { display: none; } }
+.av.team { border-radius: 6px; }

@@ -1,4 +1,4 @@
-/* Routa · data contracts v3 (sandbox)
+/* Routa · data contracts demo (sandbox)
    Sidebar of contracts and systems; contract pages show checkpoints turning green/yellow/red as each
    message passes; system pages show who feeds it and who it feeds. Everything is derived from events. */
 (() => {
@@ -42,6 +42,10 @@
   const lvl = (l) => `<span class="lvl">${dots(l)}<span class="lvl-name">${esc(l)}</span></span>`;
   const initials = (n) => n.split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
   const av = (n, lg) => `<span class="av c${[...n].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6}${lg ? ' lg' : ''}" title="${esc(n)}" aria-hidden="true">${esc(initials(n))}</span>`;
+  // owners are teams: a square badge for the team, its manager as the escalation contact, its channel for alerts
+  const teamInitials = (t) => t.replace(/\bteam\b/i, '').trim().split(/[\s&]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase() || t[0];
+  const tav = (t, lg) => `<span class="av team c${[...t].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 6}${lg ? ' lg' : ''}" title="${esc(t)}" aria-hidden="true">${esc(teamInitials(t))}</span>`;
+  const chan = (t) => '#' + t.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const since = (ms) => `<span data-since="${ms}">${esc(P.dur((S.now() - ms) / P.MIN))}</span>`;
   const STATE_TXT = { passed: 'Passed', 'passed-late': 'Passed late', 'passed-very-late': 'Passed very late', transit: 'In transit', late: 'Late', 'very-late': 'Very late', error: 'Error', blocked: 'Blocked', waiting: 'Waiting' };
 
@@ -86,7 +90,7 @@
     setInterval(loop, 700);
   }).catch((e) => {
     console.error(e);
-    $('#view').innerHTML = `<h1>Data not loaded</h1><p>The page reads files from <code>data/</code>, which browsers block when opened straight from disk. Run <code>python3 -m http.server</code> in the repository folder and open <code>http://localhost:8000/v3/</code>.</p>`;
+    $('#view').innerHTML = `<h1>Data not loaded</h1><p>The page reads files from <code>data/</code>, which browsers block when opened straight from disk. Run <code>python3 -m http.server</code> in the repository folder and open <code>http://localhost:8000/demo/</code>.</p>`;
   });
 
   function compute() { M = P.derive(reg, S.events, S.now()); }
@@ -140,7 +144,7 @@
         <div class="grp-items${isClosed ? ' closed' : ''}">${items.map((k) => `<a class="leaf${route.view === 'contract' && route.id === k.c.id ? ' on' : ''}" href="#/c/${encodeURIComponent(k.c.id)}">${td(k.tone)}<span class="nm">${esc(k.c.name)}</span></a>`).join('')}</div>`;
     }).join('');
     const systemGroups = reg.stages.map((st) => {
-      const items = Object.values(M.systems).filter((s) => s.sys.stage === st.id && (!q || `${s.sys.name} ${s.sys.id} ${s.sys.owner}`.toLowerCase().includes(q)))
+      const items = Object.values(M.systems).filter((s) => s.sys.stage === st.id && (!q || `${s.sys.name} ${s.sys.id} ${s.sys.owner} ${s.sys.team}`.toLowerCase().includes(q)))
         .sort((a, b) => b.hops.length - a.hops.length);
       if (!items.length) return '';
       const gid = 's:' + st.id, isClosed = closed.has(gid) && !q;
@@ -190,7 +194,7 @@
     lastSig = sig;
     v.innerHTML = html;
     v.scrollTop = keep;
-    document.title = `${$('h1', v)?.textContent.trim() || 'Routa'} · Routa data contracts v3`;
+    document.title = `${$('h1', v)?.textContent.trim() || 'Routa'} · Routa demo`;
     afterRender();
   }
   function notFound() {
@@ -210,7 +214,7 @@
         <span>${tp(k.tone, STATE_TXT[h.state])}</span>
         <span class="w"><b>${esc(k.c.name)}</b><small>${esc(areaName(k.c.area))} · at ${esc(h.sys.name)}</small></span>
         <span class="why">${hopWhy(h)}</span>
-        <span class="who">${av(w.owner)}<span>${esc(w.owner)}<small>${esc(w.team)}${h.fixer ? ' · sender' : ''}</small></span></span>
+        <span class="who">${tav(w.team)}<span>${esc(w.team)}<small>${h.fixer ? 'sends the data · ' : ''}${esc(chan(w.team))} · manager ${esc(w.owner)}</small></span></span>
       </a></li>`;
     }).join('');
     const sample = S.events.filter((e) => e.flow === 'supplier-invoices' && e.system_id === 'INT-01').slice(-1)[0];
@@ -230,7 +234,7 @@
 
       <section class="sect">
         <h2>Needs attention <span class="count${att.some((k) => k.tone === 'bad') ? ' bad' : ''}">${att.length}</span></h2>
-        <p class="sub">Red first. The name on the right is who to call; for blocked data it is the system that sent it.</p>
+        <p class="sub">Red first. On the right: the team that is told in its channel, and its manager, who hears if nobody picks it up. For blocked data it is the team that sent the data.</p>
         ${att.length ? `<ul class="att">${items}</ul>` : '<p class="muted">Nothing late or red right now.</p>'}
       </section>
 
@@ -361,7 +365,7 @@
       const name = full.length > maxChars ? full.slice(0, maxChars - 1) + '…' : full;
       const right = c !== last;
       const lx = right ? n.x + BAR + 6 : n.x - 6, ly = n.y + Math.min(n.h / 2, 13) + 4;
-      tips.set(`sn${id}`, `<dl><dt>${esc(S0.sys.name)}</dt><dd>${esc(id)} · ${esc(S0.sys.owner)}</dd><dt>Contracts</dt><dd>${visits[id].length}${S0.bad ? ` · ${S0.bad} late or red` : ''}</dd></dl>`);
+      tips.set(`sn${id}`, `<dl><dt>${esc(S0.sys.name)}</dt><dd>${esc(id)} · ${esc(S0.sys.team)}</dd><dt>Contracts</dt><dd>${visits[id].length}${S0.bad ? ` · ${S0.bad} late or red` : ''}</dd></dl>`);
       return `<g class="snode" data-id="${esc(id)}" data-k="${visits[id].map((ci) => M.contracts[ci].c.id).join(' ')}" data-tipkey="sn${esc(id)}" tabindex="0" role="link" aria-label="${esc(S0.sys.name)}, ${visits[id].length} contracts">
         <rect x="${n.x}" y="${n.y}" width="${BAR}" height="${n.h}" rx="3" fill="${col[S0.tone]}"/>
         <text x="${lx}" y="${ly}" text-anchor="${right ? 'start' : 'end'}">${esc(name)} <tspan class="c">${visits[id].length}</tspan></text></g>`;
@@ -409,7 +413,7 @@
     const nodes = sysList.map((s) => {
       const p = pos[s.sys.id];
       const name = s.sys.name.length > 19 ? s.sys.name.slice(0, 18) + '…' : s.sys.name;
-      tips.set(`n${s.sys.id}`, `<dl><dt>${esc(s.sys.name)}</dt><dd>${esc(s.sys.id)} · ${esc(s.sys.owner)}</dd><dt>Contracts</dt><dd>${s.hops.length}${s.bad ? ` · ${s.bad} late or red` : ''}</dd></dl>`);
+      tips.set(`n${s.sys.id}`, `<dl><dt>${esc(s.sys.name)}</dt><dd>${esc(s.sys.id)} · ${esc(s.sys.team)}</dd><dt>Contracts</dt><dd>${s.hops.length}${s.bad ? ` · ${s.bad} late or red` : ''}</dd></dl>`);
       return `<g class="mnode" data-id="${esc(s.sys.id)}" data-tipkey="n${esc(s.sys.id)}" tabindex="0" role="link" aria-label="${esc(s.sys.name)}">
         <rect class="b" x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="4"/>
         <rect x="${p.x}" y="${p.y}" width="4" height="${nodeH}" rx="2" fill="${col[s.tone]}"/>
@@ -434,7 +438,7 @@
         <span class="top">${ic(x.sys.stage)}<span class="nm">${esc(x.sys.name)}</span></span>
         <span class="id">${esc(x.sys.id)} · ${esc(stageName(x.sys.stage))}</span>
         <span class="st">${tp(x.tone, STATE_TXT[x.state])}<span>${hopLine(x)}</span></span>
-        <span class="own">${av(x.sys.owner)}${esc(x.sys.owner)}</span>
+        <span class="own">${tav(x.sys.team)}${esc(x.sys.team)}</span>
         <span class="chev" aria-hidden="true">›</span>
       </a>${wire}`;
     }).join('');
@@ -458,10 +462,10 @@
       <div class="crumbs"><a href="#/">Overview</a><span>/</span>Data contracts<span>/</span>${esc(areaName(c.area))}</div>
       <div class="head">${ic('contract', 'big-ic')}<div>
         <h1>${esc(c.name)} ${tp(k.tone, k.worst ? STATE_TXT[k.worst.state] : TONE[k.tone])}</h1>
-        <div class="meta"><code>${esc(c.contract)}</code><span>runs ${esc(P.every(c.every_min))}</span><span>checkpoint SLA ${c.checkpoint_sla_min} min</span>${lvl(c.security_level)}${src ? `<span>${av(src.owner)} ${esc(src.owner)}, producer</span>` : ''}</div>
+        <div class="meta"><code>${esc(c.contract)}</code><span>runs ${esc(P.every(c.every_min))}</span><span>checkpoint SLA ${c.checkpoint_sla_min} min</span>${lvl(c.security_level)}${src ? `<span>${tav(src.team)} ${esc(src.team)}, producing team</span>` : ''}</div>
       </div></div>
       ${c.description ? `<p class="desc">${esc(c.description)}</p>` : ''}
-      ${h ? `<div class="callout ${k.tone}">${av(who(h).owner, true)}<div class="txt"><b>${esc(STATE_TXT[h.state])} at ${esc(h.sys.name)} · call ${esc(who(h).owner)}, ${esc(who(h).team)}</b>${hopWhy(h)}</div></div>` : ''}
+      ${h ? `<div class="callout ${k.tone}">${tav(who(h).team, true)}<div class="txt"><b>${esc(STATE_TXT[h.state])} at ${esc(h.sys.name)} · ${esc(who(h).team)} is told in ${esc(chan(who(h).team))}</b>${hopWhy(h)} <span class="muted">· Manager: ${esc(who(h).owner)}</span></div></div>` : ''}
 
       <section class="sect">
         <h2>Checkpoints ${k.cur ? `<span class="muted" style="font-weight:400;font-size:14px">run <span class="mono">${esc(k.cur.id)}</span> started ${esc(P.hhmm(k.cur.start))}</span>` : ''}</h2>
@@ -500,7 +504,7 @@
       const names = l.hops.map((h) => h.contract.name);
       tips.set(`${dir}${otherId}`, `<dl><dt>${dir === 'u' ? `${esc(otherId)} → ${esc(id)}` : `${esc(id)} → ${esc(otherId)}`}</dt><dd>${l.hops.map((h) => `${esc(h.contract.name)}: ${esc(STATE_TXT[h.state])}`).join('<br>')}</dd></dl>`);
       return `<a class="nb ${l.tone === 'wait' ? '' : l.tone}" href="#/s/${encodeURIComponent(otherId)}" data-link="${dir}" data-tipkey="${dir}${esc(otherId)}" data-tone="${esc(l.tone)}">
-        ${ic(o.sys.stage)}<span class="t"><b>${esc(o.sys.name)}</b><small>${names.length} contract${names.length === 1 ? '' : 's'} · ${esc(o.sys.owner)}</small></span><span class="chev" aria-hidden="true">›</span></a>`;
+        ${ic(o.sys.stage)}<span class="t"><b>${esc(o.sys.name)}</b><small>${names.length} contract${names.length === 1 ? '' : 's'} · ${esc(o.sys.team)}</small></span><span class="chev" aria-hidden="true">›</span></a>`;
     };
     const late = s.hops.filter((h) => h.tone === 'late').length, red = s.hops.filter((h) => h.tone === 'bad').length;
     const levels = [...new Set(s.hops.map((h) => h.e && h.e.security_level).filter(Boolean))].sort((a, b) => SEC[b] - SEC[a]);
@@ -516,7 +520,7 @@
       <div class="crumbs"><a href="#/">Overview</a><span>/</span>Systems<span>/</span>${esc(stageName(s.sys.stage))}</div>
       <div class="head">${ic(s.sys.stage, 'big-ic')}<div>
         <h1>${esc(s.sys.name)} ${tp(s.tone)}</h1>
-        <div class="meta"><span class="mono">${esc(id)}</span><span>${esc(stageName(s.sys.stage))}</span><span>${av(s.sys.owner)} ${esc(s.sys.owner)}, ${esc(s.sys.team)}</span><span>cleared for ${lvl(s.sys.clearance)}</span></div>
+        <div class="meta"><span class="mono">${esc(id)}</span><span>${esc(stageName(s.sys.stage))}</span><span>${tav(s.sys.team)} ${esc(s.sys.team)} · manager ${esc(s.sys.owner)}</span><span>cleared for ${lvl(s.sys.clearance)}</span></div>
       </div></div>
 
       <section class="sect">
@@ -529,8 +533,8 @@
             <div class="center ${tone}" id="ego-center">
               <div class="top">${ic(s.sys.stage)}<div><b>${esc(s.sys.name)}</b><small>${esc(id)} · ${esc(stageName(s.sys.stage))}</small></div></div>
               <hr>
-              <div class="lbl">Owner</div>
-              <div style="display:flex;gap:8px;align-items:center">${av(s.sys.owner, true)}<span>${esc(s.sys.owner)}<br><small class="muted">${esc(s.sys.team)}</small></span></div>
+              <div class="lbl">Owning team</div>
+              <div style="display:flex;gap:8px;align-items:center">${tav(s.sys.team, true)}<span>${esc(s.sys.team)}<br><small class="muted">${esc(chan(s.sys.team))} · manager ${esc(s.sys.owner)}</small></span></div>
               <div class="lbl" style="margin-top:12px">Data it sends</div>
               <div>${levels.map(lvl).join(' ') || '—'} <small class="muted">· cleared for ${esc(s.sys.clearance)}</small></div>
               <div class="stats"><div><b>${s.hops.length}</b>contracts</div><div><b>${late}</b>late</div><div><b>${red}</b>red</div></div>

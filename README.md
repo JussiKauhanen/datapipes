@@ -1,22 +1,25 @@
 # datapipes
 
-Sandbox prototype of a lightweight data contract and integration catalogue for a fictional Finnish builder, **Routa Rakennus Oyj**. Data contracts, checkpoints, dependencies and owners on one platform. Every name, system and number is invented.
+Sandbox prototype of data contracts and checkpoints for a fictional Finnish builder, **Routa Rakennus Oyj**: every data flow gets a promise, an owning team and a light that shows whether the promise is kept. Every name, system and number is invented.
 
-## Try it on GitHub Pages
+## Pages
 
-| Page | Link | What it shows |
+| Page | Link | What it is for |
 |---|---|---|
-| Demo (v3) | [jussikauhanen.github.io/datapipes/v3](https://jussikauhanen.github.io/datapipes/v3/) | Contracts and systems in a sidebar, live checkpoints turning green, yellow and red, relationship diagrams per system, Sankey system map |
-| Landscape (beta) | [jussikauhanen.github.io/datapipes/v-beta](https://jussikauhanen.github.io/datapipes/v-beta/) | Everything on one screen: landscape map and a contract × system grid |
-| How to get here | [jussikauhanen.github.io/datapipes/guide](https://jussikauhanen.github.io/datapipes/guide/) | For data architects: why contracts, the data model from simple to hard, what systems send, how contracts are managed, how expectations and retention work, decisions needed |
+| Tour | [jussikauhanen.github.io/datapipes/tour](https://jussikauhanen.github.io/datapipes/tour/) | Start here. A scripted three-minute walk: one flow, what happens when it breaks, who is affected, times thirty, adding a system, what it takes. Use ← → to present. |
+| Demo | [jussikauhanen.github.io/datapipes/demo](https://jussikauhanen.github.io/datapipes/demo/) | Explore freely: contracts and systems in a sidebar, live checkpoints, relationship diagrams, Sankey map, simulated problems. |
+| Landscape | [jussikauhanen.github.io/datapipes/landscape](https://jussikauhanen.github.io/datapipes/landscape/) | Everything on one screen: landscape map and a contract × system grid. |
+| How to get here | [jussikauhanen.github.io/datapipes/guide](https://jussikauhanen.github.io/datapipes/guide/) | For architects: why, the smallest version, the data model, open standards, ways in, management, expectations, retention, decisions. |
 
-The root address, [jussikauhanen.github.io/datapipes](https://jussikauhanen.github.io/datapipes/), forwards to the demo.
+The root address forwards to the tour. The old `/v3/` and `/v-beta/` addresses forward to the demo and the landscape.
+
+Owners are teams, not people: each team has a manager and a channel. Alerts go to the team's channel; the manager hears if nobody picks them up.
 
 ## Run locally
 
 ```sh
 python3 -m http.server 8000
-# open http://localhost:8000/v3/, /v-beta/ or /guide/
+# open http://localhost:8000/
 ```
 
 Opening an `index.html` straight from disk does not load the data files.
@@ -24,10 +27,11 @@ Opening an `index.html` straight from disk does not load the data files.
 ## Layout
 
 ```
-index.html        forwards to v3/
-v3/               the demo: engine.js (simulator + status model), app.js, data/
-v-beta/           landscape and grid, same engine and data
-guide/            how to get from the demo to the real thing
+index.html     forwards to tour/
+tour/          scripted walkthrough
+demo/          the live demo: engine.js (simulator + status model), app.js, data/
+landscape/     landscape and grid, same engine and data
+guide/         how to get from the prototype to the real thing
+shared/        the top bar used by every page
+v3/, v-beta/   forward to the new addresses
 ```
-
-The simulator in `engine.js` plays the systems and emits checkpoint events; the pages only read those events. `data/register.json` holds systems, owners and contracts; `data/simulation.json` describes the fake world behind the demo.

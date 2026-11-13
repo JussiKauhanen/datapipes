@@ -1,4 +1,4 @@
-/* Routa · pipeline status — shared engine (v3 and v-beta)
+/* Routa · pipeline status — shared engine (demo and landscape)
    Two separate halves on purpose:
    1. Sim   — a fake world of systems that run on schedules and emit events. Only the demo needs this.
    2. Model — turns the events (and nothing else) into checkpoint statuses. This is the part a real

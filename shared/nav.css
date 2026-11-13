@@ -1,0 +1,31 @@
+/* One top bar for every page: logo, the four pages in a fixed order, then page tools on the right. */
+.appbar {
+  position: sticky; top: 0; z-index: 40; height: 56px; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; background: var(--bg); border-bottom: 1px solid var(--border); backdrop-filter: none;
+}
+.appbar .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); font: 600 15px/1 var(--sans); flex: none; }
+.appbar .logo svg { width: 24px; height: 24px; }
+.appbar .logo rect { fill: #e0541b; }
+.appbar .logo path { stroke: #fff; stroke-width: 2; fill: none; }
+.topnav { display: flex; align-self: stretch; gap: 2px; margin-left: 10px; min-width: 0; }
+.topnav a {
+  display: flex; align-items: center; padding: 0 12px; font: 500 14px/1 var(--sans); color: var(--text-2);
+  text-decoration: none; border-top: 2px solid transparent; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.topnav a:hover { color: var(--text); background: var(--hover); }
+.topnav a[aria-current="page"] { color: var(--blue-text); border-bottom-color: var(--blue); font-weight: 600; }
+.appbar .spacer { flex: 1; }
+.simtag { font: 700 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .02em; padding: 4px 6px; border-radius: 3px; background: var(--warn-bg, var(--late-bg)); color: var(--warn, var(--late-text)); white-space: nowrap; }
+@media (max-width: 1100px) { .appbar .clock { display: none; } }
+@media (max-width: 860px) {
+  .appbar .logo span { display: none; }
+  .appbar .simtag { display: none; }
+  .appbar .seg { display: none; }
+}
+@media (max-width: 700px) {
+  :root { --appbar-h: 97px; }
+  .appbar { flex-wrap: wrap; height: auto; padding-top: 8px; row-gap: 0; }
+  .topnav { order: 10; flex: 1 0 100%; margin: 8px -16px 0; padding: 0 8px; height: 40px; border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav a { padding: 0 9px; font-size: 13.5px; }
+}

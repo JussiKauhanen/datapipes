@@ -1,8 +1,8 @@
-# datapipes · v3
+# datapipes · demo
 
-Contract-level catalogue with live checkpoints and relationship diagrams. Sits next to the main page; nothing outside `v3/` is touched.
+Contract-level catalogue with live checkpoints and relationship diagrams. The live, explorable demo. The tour links here when you want to dig in.
 
-Open at `http://localhost:8000/v3/` (run `python3 -m http.server 8000` in the repository root) or `/datapipes/v3/` on GitHub Pages.
+Open at `http://localhost:8000/demo/` (run `python3 -m http.server 8000` in the repository root) or `/datapipes/demo/` on GitHub Pages.
 
 ## What is in it
 

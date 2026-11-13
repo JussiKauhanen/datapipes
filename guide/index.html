@@ -10,17 +10,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="guide.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../shared/nav.css">
 </head>
 <body>
 <header class="appbar">
-  <a class="logo" href="../v3/" aria-label="Routa data, back to the demo">
+  <a class="logo" href="../tour/" aria-label="Routa Data, start of the tour">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
     <span>Routa Data</span>
   </a>
-  <span class="tag">Guide</span>
+  <nav class="topnav" aria-label="Pages">
+    <a href="../tour/">Tour</a>
+    <a href="../demo/">Demo</a>
+    <a href="../landscape/">Landscape</a>
+    <a href="../guide/" aria-current="page">How to get here</a>
+  </nav>
   <span class="spacer"></span>
-  <a class="btn hide-sm" href="../v-beta/">Landscape</a>
-  <a class="btn primary" href="../v3/">Open the demo</a>
   <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
     <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
   </button>
@@ -65,8 +69,8 @@
       <div class="vs">
         <div class="row hd"><div>Without a contract</div><div>With a contract and checkpoints</div></div>
         <div class="row"><div><span class="topic">A field disappears upstream</span>Reports quietly go wrong. Someone notices at month-end.</div><div><span class="topic">&nbsp;</span>The change is checked against registered readers before it ships. Breaking changes need a new major version.</div></div>
-        <div class="row"><div><span class="topic">A feed stops at 03:00</span>Found at 09:00, in a meeting, by the person who needed the numbers.</div><div><span class="topic">&nbsp;</span>The checkpoint turns yellow minutes after it was due. The steward is told before anyone opens a report.</div></div>
-        <div class="row"><div><span class="topic">"Who owns this?"</span>The ticket moves between three teams.</div><div><span class="topic">&nbsp;</span>Every system and every contract has a named business owner and steward.</div></div>
+        <div class="row"><div><span class="topic">A feed stops at 03:00</span>Found at 09:00, in a meeting, by the person who needed the numbers.</div><div><span class="topic">&nbsp;</span>The checkpoint turns yellow minutes after it was due. The owning team is told in its channel before anyone opens a report.</div></div>
+        <div class="row"><div><span class="topic">"Who owns this?"</span>The ticket moves between three teams.</div><div><span class="topic">&nbsp;</span>Every system and every contract is owned by a team, with a manager and a channel.</div></div>
         <div class="row"><div><span class="topic">Personal data ends up in analytics</span>Found in an audit.</div><div><span class="topic">&nbsp;</span>Data above a system's clearance is held back at the door, and the sender is named.</div></div>
         <div class="row"><div><span class="topic">"What does this outage break?"</span>Guessed.</div><div><span class="topic">&nbsp;</span>Read down one column: 18 contracts, 11 systems after it.</div></div>
       </div>
@@ -81,9 +85,9 @@
       <div data-snip="minimal"></div>
       <div class="gets">
         <div><b>What it already gives</b>
-          <ul><li>A light per contract: green, yellow, red</li><li>Who to call when it goes red</li><li>Failures and late arrivals, not just failures</li></ul></div>
+          <ul><li>A light per contract: green, yellow, red</li><li>Which team is told when it goes red</li><li>Failures and late arrivals, not just failures</li></ul></div>
         <div><b>What it doesn't give yet</b>
-          <ul><li><i>Where</i> in the pipe it stopped: needs a checkpoint per system (level 3)</li><li>Who else breaks: needs readers (level 4)</li><li>Secret data held back: needs security levels (levels 1 and 3)</li><li>Sharper timing: needs learned expectations</li></ul></div>
+          <ul><li><i>Where</i> in the pipe it stopped: needs a checkpoint per system (level 3)</li><li>Who else breaks: needs readers (level 4)</li><li>Secret data held back: needs security levels (levels 1 and 3)</li><li>Escalation to the manager when nobody picks it up: needs managers in the register</li><li>Sharper timing: needs learned expectations</li></ul></div>
       </div>
       <p style="color:var(--text-2);font-size:15px;margin-top:14px">Each level of the data model below adds one of those. You can stop at any level and still have something useful.</p>
     </section>
@@ -98,7 +102,7 @@
         <svg viewBox="0 0 900 250" role="img" aria-label="System has many checkpoints; contract has many checkpoints; contract has a producer and readers that are systems; each checkpoint belongs to a run">
           <g class="ent"><rect x="20" y="40" width="220" height="150" rx="8"/><rect class="hd" x="20" y="40" width="220" height="32" rx="8"/>
             <text class="t" x="34" y="61">System</text>
-            <text class="f" x="34" y="94">id, name, stage</text><text class="f" x="34" y="116">owner, steward</text><text class="f" x="34" y="138">clearance</text>
+            <text class="f" x="34" y="94">id, name, stage</text><text class="f" x="34" y="116">team, manager, channel</text><text class="f" x="34" y="138">clearance</text>
             <text class="lab" x="34" y="176">level 1</text></g>
           <g class="ent"><rect x="660" y="40" width="220" height="150" rx="8"/><rect class="hd" x="660" y="40" width="220" height="32" rx="8"/>
             <text class="t" x="674" y="61">Contract</text>
@@ -117,7 +121,7 @@
       <div class="ladder" style="margin-top:18px">
         <div class="lv open">
           <button type="button" class="lh" aria-expanded="true"><span class="step">1</span>
-            <span class="tx"><b>Register: systems and owners</b><span>Every system once, with a stage, an owner, a steward and the highest security level it may hold.</span></span>
+            <span class="tx"><b>Register: systems and owners</b><span>Every system once, with a stage, the team that owns it, that team's manager and channel, and the highest security level it may hold.</span></span>
             <span class="meta"><span class="pill green">Days</span><span class="pill">Spreadsheet is fine</span>
               <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></span></button>
           <div class="lb">
@@ -176,7 +180,7 @@
       <div class="tw"><table>
         <thead><tr><th>Our piece</th><th>Standard</th><th>Status</th><th>How we would use it</th></tr></thead>
         <tbody>
-          <tr><td>Contract file<br><small style="color:var(--text-3)">levels 2 and 4</small></td><td><b>Open Data Contract Standard (ODCS)</b><br><small style="color:var(--text-3)">Bitol, LF AI &amp; Data · Apache 2.0</small></td><td><span class="pill green">v3.x, stable</span></td><td>Write every contract in it from day one. Owner, steward, SLA, field classification and quality rules all have a place. Linting and tests come free with the open-source Data Contract CLI.</td></tr>
+          <tr><td>Contract file<br><small style="color:var(--text-3)">levels 2 and 4</small></td><td><b>Open Data Contract Standard (ODCS)</b><br><small style="color:var(--text-3)">Bitol, LF AI &amp; Data · Apache 2.0</small></td><td><span class="pill green">v3.x, stable</span></td><td>Write every contract in it from day one. Owning team, roles, SLA, field classification and quality rules all have a place. Linting and tests come free with the open-source Data Contract CLI.</td></tr>
           <tr><td>Checkpoint event<br><small style="color:var(--text-3)">level 3</small></td><td><b>OpenLineage</b><br><small style="color:var(--text-3)">LF AI &amp; Data graduate project</small></td><td><span class="pill green">Widely supported</span></td><td>The format we store. Systems keep sending the small event; the intake translates it. Capable systems can send OpenLineage directly. Lineage tools and catalogues can read the result.</td></tr>
           <tr><td>Meaning<br><small style="color:var(--text-3)">level 5</small></td><td><b>Apache Ossie</b><br><small style="color:var(--text-3)">formerly Open Semantic Interchange</small></td><td><span class="pill amber">Incubating, v0.2 draft</span></td><td>Watch and pilot at the analytics end, for example Finance in Power BI once the converter Microsoft is building is out. Share field names and owners with the contracts from the start.</td></tr>
           <tr><td>Webhook envelope<br><small style="color:var(--text-3)">ways in</small></td><td><b>CloudEvents</b><br><small style="color:var(--text-3)">CNCF</small></td><td><span class="pill green">Stable</span></td><td>Optional. If a source can choose its webhook format, ask for CloudEvents; if not, map whatever it sends.</td></tr>
@@ -211,7 +215,7 @@
         <div class="arrow" aria-hidden="true">→</div>
         <div class="core"><b>Intake</b><span>authenticate · map · deduplicate · translate to OpenLineage</span></div>
         <div class="arrow" aria-hidden="true">→</div>
-        <div class="outs"><span>Checkpoint store</span><span>Board and status</span><span>Alerts to stewards</span></div>
+        <div class="outs"><span>Checkpoint store</span><span>Board and status</span><span>Alerts to team channels</span></div>
       </div>
       <div class="ways">
         <div class="way"><div class="wt"><span class="pill green">Start here</span><b>Integration step</b></div>
@@ -242,19 +246,20 @@
         <div><b>Propose</b>Steward edits the file and opens a pull request.</div>
         <div><b>Check</b>Automated: valid ODCS, owners exist, levels are known.</div>
         <div><b>Impact</b>Breaking changes list the readers who use the field and notify them.</div>
-        <div><b>Approve</b>Business owner approves. Breaking changes also need the readers.</div>
+        <div><b>Approve</b>The owning team's manager approves. Breaking changes also need the reading teams.</div>
         <div><b>Publish</b>Merged file goes live in the catalogue and on the board.</div>
       </div>
       <div data-snip="yaml"></div>
 
       <h3>Who does what</h3>
+      <p style="color:var(--text-2);font-size:15px">Owners are teams, not people: people change jobs and go on holiday, teams stay. Every team names a manager and a channel, and that is all the register needs.</p>
       <div class="tw"><table>
         <thead><tr><th>Role</th><th>Answers for</th><th>Typical person</th></tr></thead>
         <tbody>
-          <tr><td>Business owner</td><td>What the data means, who may use it, approving changes.</td><td>Head of the function that produces the data</td></tr>
-          <tr><td>Steward</td><td>The feed working, the contract file being right, announcing changes. Gets the alerts.</td><td>System or integration specialist</td></tr>
-          <tr><td>Reader</td><td>Registering which fields it uses. Saying yes or no to breaking changes.</td><td>Owner of the report, app or model</td></tr>
-          <tr><td>Platform team</td><td>The event endpoint, the register, the board, retention.</td><td>Data platform</td></tr>
+          <tr><td>Owning team</td><td>The feed working, the contract file being right, announcing changes. Gets the alerts in its channel; whoever is on duty picks them up.</td><td>The team that runs the system or the integration</td></tr>
+          <tr><td>Manager</td><td>Approving contract changes, setting priorities, and hearing about anything nobody has picked up (for example after 15 minutes).</td><td>The team's line or product manager</td></tr>
+          <tr><td>Reading teams</td><td>Registering which fields they use. Saying yes or no to breaking changes. Told when their data is late, so they don't act on stale numbers.</td><td>Teams behind the reports, apps and models</td></tr>
+          <tr><td>Platform team</td><td>The intake, the register, the board, retention. Answers when the board itself is wrong.</td><td>Data platform</td></tr>
         </tbody>
       </table></div>
       <p style="margin-top:14px;color:var(--text-2);font-size:15px">Versioning follows the usual rule: major for anything that breaks a reader (remove, rename, change type), minor for anything safe (add an optional field, a new value). The old major stays published until its last reader has moved, with a sunset date.</p>
@@ -278,7 +283,7 @@
       <div class="lights">
         <div><b><i style="background:var(--ok)"></i>Green</b>Arrived within the normal range for this checkpoint and time slot.</div>
         <div><b><i style="background:var(--late)"></i>Yellow</b>Later than expected: the declared SLA, or the learned 95th percentile once the owner has accepted it. Worth a look, no alert.</div>
-        <div><b><i style="background:var(--bad)"></i>Red</b>Past 3× the expected time, an error, or data above the clearance. The steward is alerted.</div>
+        <div><b><i style="background:var(--bad)"></i>Red</b>Past 3× the expected time, an error, or data above the clearance. The owning team is alerted in its channel; the manager hears if nobody acknowledges.</div>
       </div>
       <ul style="color:var(--text-2);font-size:15px;margin-top:16px;max-width:72ch">
         <li><b>Learn per time slot</b>, not one average: weekday mornings, nights, month-end close and the Finnish holiday calendar each behave differently.</li>
@@ -314,7 +319,7 @@
       <p class="sub">Each step is useful on its own, and each one can stop if it doesn't pay off.</p>
       <ol class="road">
         <li data-n="0" class="now"><b>Sandbox <span class="pill green">Now</span></b><span>This demo, invented data. Agree on the model and the event.</span></li>
-        <li data-n="1"><b>Register</b><span>List the real systems, owners and stewards. Level 1 only; a spreadsheet is enough.</span></li>
+        <li data-n="1"><b>Register</b><span>List the real systems and the teams that own them, with each team's manager and channel. Level 1 only; a spreadsheet is enough.</span></li>
         <li data-n="2"><b>Pilot three contracts</b><span>Pick three that hurt when they break, for example supplier invoices, worker check-ins and project budgets. The integration platform sends their checkpoints. Expectations declared.</span></li>
         <li data-n="3"><b>Everything through the hub</b><span>Every integration step emits checkpoints. Contracts move to git; readers register their fields.</span></li>
         <li data-n="4"><b>Learn and tighten</b><span>Learned expectations switched on; owners review suggestions; the systems that matter most send their own events.</span></li>
@@ -339,7 +344,7 @@
 
     <div class="end">
       <div><h2>See it working</h2><p>The demo uses exactly this model: register, contracts, checkpoint events and declared expectations.</p></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="../v-beta/">Landscape</a><a class="btn primary" href="../v3/">Open the demo</a></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="../tour/">Take the tour</a><a class="btn primary" href="../demo/">Open the demo</a></div>
     </div>
   </main>
 </div>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Routa · Tour</title>
+<meta name="description" content="A three-minute walk through data contracts and checkpoints: one flow, what happens when it breaks, who is affected, and what it takes. Invented data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../demo/base.css">
+<link rel="stylesheet" href="tour.css">
+<link rel="stylesheet" href="../shared/nav.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e0541b'/%3E%3Cpath d='M3 10h10M3 12.5h10' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="appbar">
+  <a class="logo" href="../tour/" aria-label="Routa Data, start of the tour">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5"/><path d="M5 14.5h14M5 18h14"/></svg>
+    <span>Routa Data</span>
+  </a>
+  <nav class="topnav" aria-label="Pages">
+    <a href="../tour/" aria-current="page">Tour</a>
+    <a href="../demo/">Demo</a>
+    <a href="../landscape/">Landscape</a>
+    <a href="../guide/">How to get here</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="icon-btn" type="button" id="theme" aria-label="Toggle dark mode">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<main class="tour">
+  <nav class="dots-nav" id="dots" aria-label="Chapters"></nav>
+  <div id="chapter" aria-live="polite"></div>
+</main>
+
+<script src="tour.js"></script>
+</body>
+</html>
